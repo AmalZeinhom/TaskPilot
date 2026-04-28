@@ -1,38 +1,26 @@
-import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
 import api from "@/API/axiosInstance";
+import { Project } from "@/Types/Project";
 import { useEffect, useState } from "react";
-import { Epic } from "@/Types/Epic";
+import { useNavigate } from "react-router-dom";
 
-export function useEpics(projectId?: string, limit = 9, page = 1) {
-  const navigate = useNavigate();
-  const [data, setData] = useState<Epic[]>([]);
+export function useProjects(limit = 9, page = 1) {
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<Project[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState(false);
-  const from = (page - 1) * limit;
 
-  const fetchEpics = async () => {
+  const from = (page - 1) * limit;
+  const navigate = useNavigate();
+
+  const fetchProjects = async () => {
     setLoading(true);
 
-    if (!projectId) {
-      setLoading(false);
-      return;
-    }
-
-    const accessToken = Cookies.get("access_token");
-
-    if (!accessToken) {
-      navigate("UNAUTHORIZED"); // This isn't a clean architectural approach, but it works for now. A better way would be to have a global auth state that this hook can check instead of directly navigating here.
-    }
-
     try {
-      const response = await api.get(`/rest/v1/project_epics`, {
+      const response = await api.get(`/rest/v1/rpc/get_projects`, {
         headers: {
           Prefer: "count=exact" // Ask the server to include the total count of items in the Content-Range header
         },
         params: {
-          project_id: `eq.${projectId}`,
           limit,
           offset: from
         }
@@ -55,8 +43,8 @@ export function useEpics(projectId?: string, limit = 9, page = 1) {
   };
 
   useEffect(() => {
-    fetchEpics();
-  }, [projectId, page, limit]);
+    fetchProjects();
+  }, [page, limit]);
 
   return {
     data,
@@ -64,6 +52,7 @@ export function useEpics(projectId?: string, limit = 9, page = 1) {
     totalPages: Math.ceil(total / limit),
     page,
     error,
-    setData
+    setData,
+    fetchProjects
   };
 }

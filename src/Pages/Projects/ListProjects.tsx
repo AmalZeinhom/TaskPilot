@@ -1,71 +1,21 @@
-import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ClipboardPenLine, X, PencilLine } from "lucide-react";
-import api from "../../API/axiosInstance";
 import { Project } from "@/Types/Project";
 import Pagination from "@/Components/Pagination";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useProjects } from "@/hooks/useProjects";
+import { useDeleteProject } from "@/hooks/useDeleteProject";
 
 export default function ProjectsList() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const pageFromURL = Number(searchParams.get("page")) || 1;
+  const { data, loading, error, totalPages, setData } = useProjects(9, pageFromURL);
+
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { deleteProject } = useDeleteProject(setData);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 9;
-
-  const [totalCount, setTotalCount] = useState(0);
-  const totalPages = Math.ceil(totalCount / limit);
-  const offset = (currentPage - 1) * limit;
-
-  async function fetchProjects() {
-    try {
-      const response = await api.get(`/rest/v1/rpc/get_projects`, {
-        params: {
-          limit,
-          offset
-        }
-      });
-
-      const contentRange = response.headers["content-range"] || response.headers["Content-Range"];
-
-      if (contentRange) {
-        const total = contentRange.split("/")[1];
-        setTotalCount(Number(total));
-      }
-
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        navigate("/login");
-      }
-    }
-  }
-
-  const {
-    data: projects = [],
-    isLoading,
-    isError
-  } = useQuery({
-    queryKey: ["projects", currentPage],
-    queryFn: fetchProjects,
-    placeholderData: (previous) => previous
-  });
-
-  async function deleteProject(projectId: string) {
-    try {
-      await api.delete(`/rest/v1/projects?id=eq.${projectId}`);
-      toast.success("Project deleted successfully.");
-
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
-    } catch (error: any) {
-      toast.error("Failed to delete the project!");
-      console.log(error);
-    }
-  }
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
         {[1, 2, 3].map((x) => (
@@ -75,11 +25,11 @@ export default function ProjectsList() {
     );
   }
 
-  if (isError) {
+  if (error) {
     return <p className="text-red-500">Failed to load projects</p>;
   }
 
-  if (!isLoading && projects.length === 0) {
+  if (!loading && data.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-2">
         <p className="text-gray-600 text-lg mb-3">No projects added yet!.</p>
@@ -121,7 +71,7 @@ export default function ProjectsList() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
-            {projects.map((project: Project) => (
+            {data.map((project: Project) => (
               <div
                 key={project.id}
                 onClick={() => navigate(`/projects/${project.id}/epics`)}
@@ -192,9 +142,11 @@ export default function ProjectsList() {
           </div>
         </div>
         <Pagination
-          currentPage={currentPage}
+          currentPage={pageFromURL}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={(newPage) => {
+            setSearchParams({ page: String(newPage) });
+          }}
         />
       </motion.div>
     </div>
