@@ -8,7 +8,7 @@ import { ForgetPassword } from "./Pages/Auth/ForgetPassword";
 import { ResetPassword } from "@/Pages/Auth/ResetPassword";
 import Layout from "./Components/Layout.js";
 import AddNewProject from "./Pages/Projects/AddNewProject.js";
-import ProjectsList from "./Pages/Projects/ProjectsList.js";
+import ProjectsList from "./Pages/Projects/ListProjects.js";
 import EditProject from "./Pages/Projects/EditProject.js";
 import ProjectMembers from "./Pages/ProjectMembers.js";
 import InviteMembers from "./Pages/Subpages/InviteMembers.js";

@@ -1,57 +1,71 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { HiOutlineLightBulb } from "react-icons/hi";
 import { CiCalendar } from "react-icons/ci";
 import { useEpics } from "@/hooks/useEpics";
 import { useState, useEffect } from "react";
-import { Epic } from "@/Types/Epic";
 import EpicsModal from "@/Pages/Epics/EpicsModal";
 import useProjectName from "@/hooks/useProjectName";
 import Pagination from "@/Components/Pagination";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/API/axiosInstance";
+import { formatedDate } from "@/Utils/FormatedDate";
+import { getInitials } from "@/Utils/GetInitials";
+import { getAvatarColor } from "@/Utils/GetAvatarColor";
+import { useUpdateEpic } from "@/hooks/useUpdateEpics";
+import { Member } from "@/Types/Member";
 
 export default function ListEpics() {
   const { projectId } = useParams<{ projectId: string }>();
   const projectName = useProjectName(projectId);
-  const queryClient = useQueryClient();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 6;
+  const [searchParams, setSearchParams] = useSearchParams(); //Sync pagination state with URL.
+  // Store only the selected epic's ID to minimize the amount of data stored in state and rely on the epics list as the source of truth for epic details. This way, when we update an epic, we only need to update the epics list, and the selected epic details will automatically reflect the changes without needing to manage two separate states.
+  const [selectedEpicId, setSelectedEpicId] = useState<string | null>(null); // Also this prevent duplication
 
-  const { epics, isLoading, isError, totalCount } = useEpics(projectId, currentPage, limit); //? First data source for epics from API
-  const [selectedEpic, setSelectedEpic] = useState<Epic | null>(null); // Control the open/close state of the modal and store the selected epic's data for details view.
+  const [members, setMembers] = useState<Member[]>([]); // Store members list to avoid refetching members every time we open the modal for different epic.
+  const [loadingMembers, setLoadingMembers] = useState(true); // Control loading state for members fetching to show loading state in assignee selector in modal.
 
-  const totalPages = Math.ceil(totalCount / limit);
+  const pageFromURL = Number(searchParams.get("page")) || 1; // Get current page from URL, if not present default to 1. This is the source of truth for pagination state.
+  const { data, loading, error, totalPages, setData } = useEpics(projectId, 9, pageFromURL); // Data is the source of truth for epics list. Whereas setData is used to update the epics list without refetching.
 
-  // Reset to first page when projectId changes to prevent showing empty state if the new project has fewer pages than the previous one
+  // This is the solution of multiple sources of truth problem. Instead of storing the selected epic's data in new state. We will derive the selected epic's data from the epics list using the selectedEpicId. So we have only one source of truth for epics data which is the data from useEpics hook. This way, when we update an epic, we only need to update the epics list, and the selected epic details will automatically reflect the changes without needing to manage two separate states.
+  const selectedEpic = data.find((e) => e.id === selectedEpicId) || null;
+
+  const { updateEpic } = useUpdateEpic(setData, members);
+
   useEffect(() => {
-    setCurrentPage(1);
+    const fetchMembers = async () => {
+      try {
+        setLoadingMembers(true);
+        const res = await api.get(`/rest/v1/get_project_members?project_id=eq.${projectId}`);
+        setMembers(res.data);
+      } catch (err) {
+        console.error("Failed to fetch members", err);
+      } finally {
+        setLoadingMembers(false);
+      }
+    };
+
+    if (projectId) {
+      fetchMembers();
+    }
   }, [projectId]);
 
-  const updateEpicMutation = useMutation({
-    mutationFn: async (updatedData: any) => {
-      return api.patch(`/rest/v1/epics?id=eq.${selectedEpic?.id}`, updatedData);
-    },
-    onSuccess: (_, updatedData) => {
-      queryClient.invalidateQueries({ queryKey: ["epics"] });
-      setSelectedEpic((prev) => (prev ? { ...prev, ...updatedData } : null));
-    }
-  });
-
-  if (isError) {
+  if (error) {
     return <p className="text-red-500">Failed to load Epics</p>;
   }
 
-  if (isLoading) {
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[1, 2, 3].map((x) => (
-        <div key={x} className="h-32 w-full bg-gray-200 animate-pulse rounded-lg" />
-      ))}
-    </div>;
+  if (loading) {
+    return (
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[1, 2, 3].map((x) => (
+          <div key={x} className="h-32 w-full bg-gray-200 animate-pulse rounded-lg" />
+        ))}
+      </div>
+    );
   }
 
-  if (!isLoading && epics.length === 0) {
+  if (!loading && data.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-2">
         <p className="text-gray-600 text-lg mb-3">No epics found for this project.</p>
@@ -97,72 +111,74 @@ export default function ListEpics() {
           </Link>
         </motion.div>
 
-        {!isLoading && epics.length > 0 && (
+        {!loading && data.length > 0 && (
           <div className="flex flex-col gap-6">
-            {epics.map((epic) => (
-              <div key={epic.id} onClick={() => setSelectedEpic(epic)}>
-                <div className="bg-brightness-primary rounded-xl shadow-xl p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 hover:cursor-pointer transition">
-                  <div className="flex flex-wrap items-center gap-6">
-                    <HiOutlineLightBulb size={24} />
-                    <div className="flex flex-col gap-2">
-                      <p className="font-bold text-sm">{epic.title}</p>
+            {data.map((epic) => {
+              const assigneeInitials = getInitials(epic.assignee?.name || "Unassigned");
+              const bgColor = getAvatarColor(epic.assignee?.name);
+              return (
+                <div key={epic.id} onClick={() => setSelectedEpicId(epic.id)}>
+                  <div className="bg-brightness-primary rounded-xl shadow-xl p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 hover:cursor-pointer transition">
+                    <div className="flex flex-wrap items-center gap-6">
+                      <HiOutlineLightBulb size={24} />
+                      <div className="flex flex-col gap-2">
+                        <p className="font-bold text-sm">{epic.title}</p>
 
-                      <div className="flex items-center gap-3 text-xs">
-                        <p># {epic.epic_id}</p>
-                        <p>
-                          Opened by <span className="font-bold">{epic.created_by.name}</span>
+                        <div className="flex items-center gap-3 text-xs">
+                          <p># {epic.epic_id}</p>
+                          <p>
+                            Opened by <span className="font-bold">{epic.created_by.name}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-16">
+                      <div>
+                        <p className="text-xs font-bold text-darkness-iconList">Created At: </p>
+                        <div className="flex items-center gap-1">
+                          <CiCalendar size={20} />
+                          <p className="text-gray-700 font-medium text-sm">
+                            {formatedDate(epic.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`rounded-full ${bgColor} text-white w-8 h-8 flex items-center justify-center font-bold`}
+                        >
+                          {/* for ensure that the name is not Undefined */}
+                          <p className="text-sm text-white font-semibold">{assigneeInitials}</p>
+                        </div>
+                        <p className="font-bold text-gray-500">
+                          {epic.assignee?.name ?? "Unassigned"}
                         </p>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-6">
-                    <div>
-                      <p className="text-xs font-bold text-darkness-iconList">Created At</p>
-                      <span className="flex items-center gap-1">
-                        <CiCalendar />
-                        <p className="text-gray-700 font-medium">
-                          {new Date(epic.created_at).toLocaleDateString("en-GB")}
-                        </p>
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-gray-300 text-gray-600 w-10 h-10 flex items-center justify-center font-bold">
-                        {/* for ensure that the name is not Undefined */}
-                        {epic.assignee?.name
-                          ?.split(" ")
-                          .map((word) => word.charAt(0))
-                          .slice(0, 2)
-                          .join("")
-                          .toUpperCase()}
-                      </span>
-                      <p className="font-bold text-gray-500">
-                        {epic.assignee?.name ?? "Unassigned"}
-                      </p>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        )}
+        <Pagination
+          currentPage={pageFromURL}
+          totalPages={totalPages}
+          onPageChange={(newPage) => {
+            setSearchParams({ page: String(newPage) }); // URL is the source of truth. Refetch epics with new page number from URL.
+          }}
+        />
 
         <EpicsModal
-          epic={selectedEpic}
-          onClose={() => setSelectedEpic(null)}
-          onUpdate={(updatedFields: Partial<Epic>) => {
-            // Update local state so EpicDetails re-renders with new values
-            setSelectedEpic((prev) => (prev ? { ...prev, ...updatedFields } : null));
-            // Also persist to the server
-            updateEpicMutation.mutate(updatedFields);
+          epic={selectedEpic} // Get epics from the data directly using the slectedEpicId.
+          onClose={() => setSelectedEpicId(null)}
+          onUpdate={(updatedFields) => {
+            if (!selectedEpicId) return;
+            updateEpic(selectedEpicId, updatedFields);
           }}
+          members={members}
+          loadingMembers={loadingMembers}
         />
       </motion.div>
     </div>

@@ -1,5 +1,6 @@
 import { EpicDetails } from "@/Pages/Epics/EpicDetails";
 import { Epic } from "@/Types/Epic";
+import { Member } from "@/Types/Member";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { createPortal } from "react-dom"; //separate modal from DOM hierarch (the main app) to prevent z-index and overflow issues
@@ -8,6 +9,8 @@ type EpicsModalProps = {
   epic: Epic | null;
   onClose: () => void;
   onUpdate: (data: Partial<Epic>) => void;
+  members: Member[];
+  loadingMembers: boolean;
 };
 
 export default function EpicsModal({ epic, onClose, onUpdate }: EpicsModalProps) {

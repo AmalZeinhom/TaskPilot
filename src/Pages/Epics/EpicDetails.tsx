@@ -7,11 +7,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Selector from "@/Utils/Selector";
 import { formatedDate } from "@/Utils/FormatedDate";
-import { useUpdateEpic } from "@/hooks/useUpdateEpics";
-import { useQueryClient } from "@tanstack/react-query";
+import { getInitials } from "@/Utils/GetInitials";
+import { getAvatarColor } from "@/Utils/GetAvatarColor";
 
 interface Member {
-  member_id: string;
   user_id: string;
   metadata: {
     name: string;
@@ -45,9 +44,6 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
 
   const selectedAssignee = options.find((o) => o.value === epic.assignee_id) || null;
 
-  const { updateEpic } = useUpdateEpic();
-  const queryClient = useQueryClient();
-
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -65,38 +61,31 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
     fetchMembers();
   }, [epic.project_id]);
 
-  const handleUpdate = async (id: string, data: any) => {
-    const success = await updateEpic(id, data);
+  const UserRow = ({ label, user }: { label: string; user: { name: string } }) => {
+    const initials = getInitials(user.name);
+    const color = getAvatarColor(user.name);
+    return (
+      <div className="flex items-center gap-4 text-sm">
+        {label === "Created By" ? (
+          <User size={18} className="text-gray-400" />
+        ) : (
+          <UserCircle size={18} className="text-gray-400" />
+        )}
 
-    if (success) {
-      queryClient.invalidateQueries({ queryKey: ["epics"] });
-    }
-  };
+        <span className="text-gray-500 w-24 sm:w-28">{label}:</span>
 
-  const UserRow = ({ label, user }: { label: string; user: { name: string } }) => (
-    <div className="flex items-center gap-4 text-sm">
-      {label === "Created By" ? (
-        <User size={18} className="text-gray-400" />
-      ) : (
-        <UserCircle size={18} className="text-gray-400" />
-      )}
+        <div className="flex items-center gap-2">
+          <div
+            className={`rounded-full ${color} text-white w-7 h-7 flex items-center justify-center font-semibold text-xs`}
+          >
+            {initials}
+          </div>
 
-      <span className="text-gray-500 w-24 sm:w-28">{label}:</span>
-
-      <div className="flex items-center gap-2">
-        <div className="rounded-full bg-gray-200 text-gray-600 w-7 h-7 flex items-center justify-center font-semibold text-xs">
-          {user.name
-            ?.split(" ")
-            .map((w) => w[0])
-            .slice(0, 2)
-            .join("")
-            .toUpperCase()}
+          <p className="text-gray-800 font-medium">{user.name}</p>
         </div>
-
-        <p className="text-gray-800 font-medium">{user.name}</p>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl bg-brightness-light rounded-2xl shadow-xl max-h-[70vh] flex flex-col">
@@ -108,7 +97,6 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
         <EditableText
           value={epic.title}
           onSave={(newTitle: string) => {
-            handleUpdate(epic.id, { title: newTitle });
             onUpdate({ title: newTitle });
           }}
           className="text-2xl font-semibold text-gray-900 mb-6"
@@ -127,11 +115,7 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                 options={options}
                 value={selectedAssignee || null}
                 onChange={(option) => {
-                  const newUserId = option?.value === null ? null : (option?.value ?? null);
-
-                  handleUpdate(epic.id, {
-                    assignee_id: newUserId
-                  });
+                  const newUserId = option?.value ?? null;
 
                   onUpdate({
                     assignee_id: newUserId
@@ -158,8 +142,6 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
               <CustomDatePicker
                 selectedDate={epic.deadline ? new Date(epic.deadline) : null}
                 onDateChange={(date) => {
-                  handleUpdate(epic.id, { deadline: date ? date.toISOString() : null });
-
                   onUpdate({
                     deadline: date ? date.toISOString() : undefined
                   });
@@ -178,7 +160,6 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
             value={epic.description || ""}
             placeholder="Add description..."
             onSave={(newDesc: string) => {
-              handleUpdate(epic.id, { description: newDesc });
               onUpdate({ description: newDesc });
             }}
             className="text-gray-600 text-sm leading-relaxed"
