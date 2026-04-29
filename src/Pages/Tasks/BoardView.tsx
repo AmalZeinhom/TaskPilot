@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useProjectName from "@/hooks/useProjectName";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, PlusIcon } from "lucide-react";
 import { TaskStatus } from "@/Constants/taskStatus";
 import Column from "./Components/Column";
 
@@ -18,6 +18,7 @@ import useFetchTasks from "@/hooks/useFetchTasks";
 export default function BoardView() {
   const { projectId } = useParams<{ projectId: string }>();
   const projectName = useProjectName(projectId);
+  const navigate = useNavigate();
 
   const [activeTask, setActiveTask] = useState<any>(null);
 
@@ -130,6 +131,13 @@ export default function BoardView() {
                 }
               />
             </div>
+            <button
+              onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
+              className="bg-blue-700 text-white py-2 px-3 rounded-lg hover:bg-blue-800 transition-colors duration-200 w-full md:hidden flex justify-center items-center gap-1"
+            >
+              <PlusIcon size={16} />
+              Add Task
+            </button>
           </div>
 
           {view === "board" ? (

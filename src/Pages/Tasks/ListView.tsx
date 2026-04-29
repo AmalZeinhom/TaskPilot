@@ -6,7 +6,7 @@ import Pagination from "@/Components/Pagination";
 import { Task } from "@/Types/Tasks";
 import { getInitials } from "@/Utils/GetInitials";
 import { statusColors } from "@/Constants/statusColors";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, MoreVertical } from "lucide-react";
 import { formatedDate } from "@/Utils/FormatedDate";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
 
@@ -90,7 +90,8 @@ export default function ListView() {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+      {/* Desktop View */}
+      <div className="hidden md:block bg-white rounded-xl shadow-xl overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-100 text-gray-600">
             <tr>
@@ -146,6 +147,48 @@ export default function ListView() {
           </tbody>
         </table>
       </div>
+
+      {/* Mobile View */}
+      <div className="md:hidden space-y-4">
+        {tasks.map((task: Task) => {
+          const initials = getInitials(task.assignee?.name || "Unassigned");
+          const color = getAvatarColor(task.assignee?.name);
+
+          return (
+            <div
+              key={task.id}
+              className="bg-brightness-primary py-6 px-4 rounded-xl shadow-xl flex flex-col justify-between"
+            >
+              <div className="flex justify-between py-3">
+                <h2 className="text-blue-600">{task.task_id}</h2>
+                <span className={`text-xs px-2 py-1 rounded ${statusColors[task.status]}`}>
+                  {task.status}
+                </span>
+              </div>
+
+              <h3 className="font-semibold text-gray-700 mb-2">{task.title}</h3>
+
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4 mt-2">
+                  <p
+                    className={`w-8 h-8 rounded-full ${color} flex items-center justify-center text-white text-xs`}
+                  >
+                    {initials}
+                  </p>
+                  <div className="flex flex-col">
+                    <p className="text-gray-500 text-sm">Due Date</p>
+                    <p className="text-sm text-gray-500 font-semibold">
+                      {formatedDate(task.due_date)}
+                    </p>
+                  </div>
+                </div>
+                <MoreVertical size={20} className="text-gray-500" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </>
   );
