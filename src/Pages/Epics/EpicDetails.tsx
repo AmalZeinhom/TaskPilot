@@ -1,6 +1,6 @@
 import api from "@/API/axiosInstance";
 import EditableText from "@/Utils/EditableText";
-import CustomDatePicker from "@/Components/DatePicker";
+import CustomDatePicker from "@/Utils/DatePicker";
 import { Epic } from "@/Types/Epic";
 import { User, UserCircle, Calendar } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";

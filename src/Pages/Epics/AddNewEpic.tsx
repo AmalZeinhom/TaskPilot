@@ -8,7 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import api from "../../API/axiosInstance";
-import CustomDatePicker from "@/Components/DatePicker";
+import CustomDatePicker from "@/Utils/DatePicker";
 
 const schema = z.object({
   title: z

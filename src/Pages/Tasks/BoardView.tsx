@@ -131,13 +131,16 @@ export default function BoardView() {
                 }
               />
             </div>
-            <button
-              onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
-              className="bg-blue-700 text-white py-2 px-3 rounded-lg hover:bg-blue-800 transition-colors duration-200 w-full md:hidden flex justify-center items-center gap-1"
-            >
-              <PlusIcon size={16} />
-              Add Task
-            </button>
+
+            {view === "list" && (
+              <button
+                onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
+                className="bg-blue-700 text-white py-2 px-3 rounded-lg hover:bg-blue-800 transition-colors duration-200 w-full md:hidden flex justify-center items-center gap-1"
+              >
+                <PlusIcon size={16} />
+                Add Task
+              </button>
+            )}
           </div>
 
           {view === "board" ? (

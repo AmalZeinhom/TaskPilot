@@ -1,11 +1,12 @@
 import api from "@/API/axiosInstance";
-import CustomDatePicker from "@/Components/DatePicker";
+import CustomDatePicker from "@/Utils/DatePicker";
 import Selector from "@/Utils/Selector";
 import { statusOptions } from "@/Constants/taskStatus";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
+import { FaStarOfLife } from "react-icons/fa";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -162,12 +163,12 @@ export default function Tasks() {
   };
 
   return (
-    <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-center items-center md:py-12 md:px-4 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-7xl bg-brightness-light rounded-2xl p-8 sm:p-8 md:p-10"
+        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-7xl bg-brightness-light rounded-2xl p-4 md:p-10"
       >
         <div className="flex gap-2 mb-6 text-sm text-gray-500">
           <Link to="/projects" className="cursor-pointer text-gray-500 hover:text-gray-700">
@@ -191,109 +192,122 @@ export default function Tasks() {
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="w-full bg-brightness-primary py-10 px-5 sm:py-8 sm:px-6 rounded-2xl shadow-2xl"
+          className="w-full bg-brightness-primary md:py-10 md:px-5 py-8 px-4 rounded-2xl shadow-2xl space-y-6"
         >
-          <div>
-            <label>Title</label>
-            <input {...register("title")} className="w-full border rounded-xl px-3 py-2 mt-2" />
+          <div className="space-y-2">
+            <span className="flex items-center gap-1">
+              <label className="text-sm">TITLE</label>
+              <FaStarOfLife className="text-red-400" size={10} />
+            </span>
+            <input
+              {...register("title")}
+              className="w-full bg-blue-100 rounded-md px-3 py-2 mt-2 text-sm"
+              placeholder="E.g., Design System Documentation"
+            />
             {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
           </div>
 
-          <div>
-            <label>Description</label>
+          <div className="space-y-2">
+            <label className="text-sm">DESCRIPTION</label>
             <textarea
               {...register("description")}
-              className="w-full border rounded-xl px-3 py-2 mt-2"
+              className="w-full bg-blue-100 rounded-md px-3 py-2 text-sm"
+              placeholder="Briefly describe the task scope..."
             />
           </div>
 
-          <div className="flex flex-row gap-8 md:flex-col">
-            <div className="grid grid-cols-2 gap-10">
-              <div className="flex flex-col gap-4 max-w-[50%]">
-                <p>Assigned to</p>
-                <Controller
-                  control={control}
-                  name="assignee_id"
-                  render={({ field }) => (
-                    <Selector
-                      options={assigneeOptions}
-                      value={assigneeOptions.find((o) => o.value === field.value) || null}
-                      onChange={(val) => field.onChange(val?.value)}
-                      placeholder="Select Assignee"
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="flex flex-col gap-4 max-w-[50%]">
-                <p>Status</p>
-                <Controller
-                  control={control}
-                  name="status"
-                  render={({ field }) => (
-                    <Selector
-                      options={statusOptions()}
-                      value={statusOptions().find((o) => o.value === field.value) || null}
-                      onChange={(val) => field.onChange(val?.value)}
-                    />
-                  )}
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm">ASSIGNEE</p>
+              <Controller
+                control={control}
+                name="assignee_id"
+                render={({ field }) => (
+                  <Selector
+                    options={assigneeOptions}
+                    value={assigneeOptions.find((o) => o.value === field.value) || null}
+                    onChange={(val) => field.onChange(val?.value)}
+                    placeholder="Select a Team Member"
+                    className="bg-blue-100"
+                    controlBg="bg-blue-100"
+                  />
+                )}
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-10">
-              <div className="flex flex-col gap-4 max-w-[50%]">
-                <p>Due Date</p>
-                <Controller
-                  control={control}
-                  name="due_date"
-                  render={({ field }) => (
-                    <CustomDatePicker
-                      selectedDate={field.value ? new Date(field.value) : null}
-                      onDateChange={(date) => field.onChange(date ? date.toISOString() : null)}
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="flex flex-col gap-4 max-w-[50%]">
-                <p>Epic</p>
-                <Controller
-                  control={control}
-                  name="epic_id"
-                  render={({ field }) => (
-                    <Selector
-                      options={epicOptions}
-                      value={epicOptions.find((o) => o.value === field.value) || null}
-                      onChange={(val) => field.onChange(val?.value)}
-                      placeholder="Select Epic"
-                    />
-                  )}
-                />
-              </div>
+            {/* Status */}
+            <div className="flex flex-col gap-2">
+              <p className="text-sm">STATUS</p>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Selector
+                    options={statusOptions()}
+                    value={statusOptions().find((o) => o.value === field.value) || null}
+                    onChange={(val) => field.onChange(val?.value)}
+                    className="bg-blue-100"
+                    controlBg="bg-blue-100"
+                  />
+                )}
+              />
             </div>
 
-            <div className="flex justify-end gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                disabled={isSubmitting}
-                className={` bg-blue-darkBlue text-white w-full sm:w-auto font-semibold px-6 py-3 rounded-xl shadow-2xl tracking-wide hover:bg-cyan-800 transition-colors duration-300 
-                          ${isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-cyan-800"}
-                          `}
-              >
-                {isSubmitting ? "Creating..." : "Create Task"}
-              </motion.button>
-
-              <button
-                type="button"
-                onClick={() => navigate(`/projects/${projectId}/tasks`)}
-                className="px-6 py-3 rounded-xl bg-gray-200"
-              >
-                Cancel
-              </button>
+            {/* Due Date */}
+            <div className="flex flex-col gap-2">
+              <p className="text-sm">DUE DATE</p>
+              <Controller
+                control={control}
+                name="due_date"
+                render={({ field }) => (
+                  <CustomDatePicker
+                    selectedDate={field.value ? new Date(field.value) : null}
+                    onDateChange={(date) => field.onChange(date ? date.toISOString() : null)}
+                    className="bg-blue-100"
+                    inputClassName="bg-blue-100"
+                  />
+                )}
+              />
             </div>
+
+            {/* Epic */}
+            <div className="flex flex-col gap-2">
+              <p className="text-sm">EPIC</p>
+              <Controller
+                control={control}
+                name="epic_id"
+                render={({ field }) => (
+                  <Selector
+                    options={epicOptions}
+                    value={epicOptions.find((o) => o.value === field.value) || null}
+                    onChange={(val) => field.onChange(val?.value)}
+                    placeholder="Select an Epic"
+                    className="bg-blue-100"
+                    controlBg="bg-blue-100"
+                  />
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-blue-darkBlue text-white w-full sm:w-auto px-6 py-3 rounded-xl"
+            >
+              {isSubmitting ? "Creating..." : "Create Task"}
+            </motion.button>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/projects/${projectId}/tasks`)}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gray-200"
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </motion.div>
