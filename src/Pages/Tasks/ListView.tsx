@@ -182,7 +182,7 @@ export default function ListView() {
                     </p>
                   </div>
                 </div>
-                <MoreVertical size={20} className="text-gray-500" />
+                <MoreVertical size={20} className="text-gray-500 cursor-pointer" />
               </div>
             </div>
           );
