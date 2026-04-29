@@ -1,38 +1,16 @@
 import { useNavigate, useParams } from "react-router-dom";
 import TaskCard from "./TaskCard";
-import api from "@/API/axiosInstance";
 import { PlusIcon } from "lucide-react";
 import { statusColors } from "@/Constants/statusColors";
-import { useQuery } from "@tanstack/react-query";
 import { useDroppable } from "@dnd-kit/core";
+import { Task } from "@/Types/Tasks";
 
-export default function Column({ status }: { status: string }) {
+export default function Column({ status, tasks }: { status: string; tasks: Task[] }) {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
   const { setNodeRef } = useDroppable({
     id: status
-  });
-
-  const fetchTasks = async () => {
-    try {
-      const res = await api.get(`/rest/v1/project_tasks`, {
-        params: {
-          project_id: `eq.${projectId}`,
-          status: `eq.${status}`
-        }
-      });
-
-      return res.data;
-    } catch (err) {
-      console.error(err);
-      return [];
-    }
-  };
-
-  const { data: tasks = [] } = useQuery({
-    queryKey: ["tasks", projectId, status],
-    queryFn: fetchTasks
   });
 
   return (
@@ -57,7 +35,7 @@ export default function Column({ status }: { status: string }) {
         {tasks.length === 0 ? (
           <p className="text-gray-400 text-sm text-center">No tasks</p>
         ) : (
-          tasks.map((task: any) => <TaskCard key={task.id} task={task} />)
+          tasks.map((task) => <TaskCard key={task.id} task={task} />)
         )}
       </div>
     </div>

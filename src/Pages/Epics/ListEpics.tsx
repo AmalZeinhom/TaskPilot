@@ -52,7 +52,7 @@ export default function ListEpics() {
   }, [projectId]);
 
   if (error) {
-    return <p className="text-red-500">Failed to load Epics</p>;
+    return <p className="text-red-500 mx-auto">Failed to load Epics</p>;
   }
 
   if (loading) {
@@ -133,8 +133,8 @@ export default function ListEpics() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-16">
-                      <div>
+                    <div className="flex flex-wrap items-center gap-6">
+                      <div className="flex items-center lg:items-start lg:flex-col gap-2">
                         <p className="text-xs font-bold text-darkness-iconList">Created At: </p>
                         <div className="flex items-center gap-1">
                           <CiCalendar size={20} />
@@ -143,6 +143,7 @@ export default function ListEpics() {
                           </p>
                         </div>
                       </div>
+
                       <div className="flex items-center gap-2">
                         <div
                           className={`rounded-full ${bgColor} text-white w-8 h-8 flex items-center justify-center font-bold`}

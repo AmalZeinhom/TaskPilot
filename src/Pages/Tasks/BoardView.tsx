@@ -10,20 +10,21 @@ import { useState } from "react";
 
 import api from "@/API/axiosInstance";
 import toast from "react-hot-toast";
-import { useQueryClient } from "@tanstack/react-query";
 import TaskCard from "./Components/TaskCard";
 import Selector from "@/Utils/Selector";
 import ListView from "./ListView";
+import useFetchTasks from "@/hooks/useFetchTasks";
 
 export default function BoardView() {
   const { projectId } = useParams<{ projectId: string }>();
   const projectName = useProjectName(projectId);
-  const queryClient = useQueryClient();
 
   const [activeTask, setActiveTask] = useState<any>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") || "board";
+
+  const { tasks, hasMore, loadMore, updateTask, error, loading } = useFetchTasks(projectId);
 
   const options = [
     { label: "Board View", value: "board" },
@@ -31,6 +32,15 @@ export default function BoardView() {
   ];
 
   const selectedOption = options.find((o) => o.value === view) || null;
+
+  // Infinite scroll handler
+  const handleScroll = (e: any) => {
+    const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 50;
+
+    if (bottom && hasMore) {
+      loadMore();
+    }
+  };
 
   function handleDragStart(event: any) {
     setActiveTask(event.active.data.current);
@@ -51,14 +61,26 @@ export default function BoardView() {
         status: newStatus
       });
 
-      toast.success("Task updated");
+      updateTask(taskId, newStatus);
 
-      queryClient.invalidateQueries({
-        queryKey: ["tasks"]
-      });
+      toast.success("Task Updated Successfully");
     } catch (err: any) {
       toast.error("Failed to update task", err.message);
     }
+  }
+
+  if (error) {
+    return <p className="text-red-500 mx-auto">Failed to load Tasks</p>;
+  }
+
+  if (loading) {
+    return (
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[1, 2, 3].map((x) => (
+          <div key={x} className="h-32 w-full bg-gray-200 animate-pulse rounded-lg" />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -83,7 +105,7 @@ export default function BoardView() {
           <span className="text-gray-700 font-medium">Tasks</span>
         </div>
 
-        <div className="bg-white rounded-2xl shadow p-4 md:p-6 flex-1 flex flex-col overflow-hidden">
+        <div className="bg-white rounded-2xl shadow p-4 md:p-6 flex-1 flex flex-col ">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-5 mb-6">
             <div className="relative w-full md:w-80">
               <SearchIcon
@@ -111,13 +133,16 @@ export default function BoardView() {
           </div>
 
           {view === "board" ? (
-            <div className="flex gap-4 overflow-x-auto flex-1 snap-x snap-mandatory scroll-smooth overscroll-x-contain touch-pan-x">
+            <div
+              onScroll={handleScroll}
+              className="flex gap-4 overflow-y-auto flex-1 snap-x snap-mandatory scroll-smooth overscroll-x-contain touch-pan-x"
+            >
               {TaskStatus.map((status) => (
                 <div
                   key={status}
                   className="min-w-[260px] sm:min-w-[280px] md:min-w-[320px] lg:min-w-[360px] flex-shrink-0 snap-start"
                 >
-                  <Column status={status} />
+                  <Column status={status} tasks={tasks.filter((t) => t.status === status)} />
                 </div>
               ))}
             </div>
