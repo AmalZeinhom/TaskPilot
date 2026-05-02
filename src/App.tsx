@@ -10,12 +10,12 @@ import Layout from "./Components/Layout.js";
 import AddNewProject from "./Pages/Projects/AddNewProject.js";
 import ProjectsList from "./Pages/Projects/ListProjects.js";
 import EditProject from "./Pages/Projects/EditProject.js";
-import ProjectMembers from "./Pages/ProjectMembers.js";
-import InviteMembers from "./Pages/Subpages/InviteMembers.js";
+import ProjectMembers from "./Pages/Members/ProjectMembers.js";
 import AddNewEpic from "./Pages/Epics/AddNewEpic.js";
 import Tasks from "./Pages/Tasks/CreateNewTask.js";
 import ListEpics from "./Pages/Epics/ListEpics.js";
 import BoardView from "./Pages/Tasks/BoardView.js";
+import AcceptInitation from "./Pages/Members/AcceptInitation.js";
 
 const routes = createBrowserRouter([
   {
@@ -38,8 +38,8 @@ const routes = createBrowserRouter([
         element: <ProjectsList />
       },
       {
-        path: "/invite-members",
-        element: <InviteMembers />
+        path: "invite",
+        element: <AcceptInitation />
       },
       {
         path: "/projects/:projectId",
@@ -52,6 +52,7 @@ const routes = createBrowserRouter([
             path: "members",
             element: <ProjectMembers />
           },
+
           {
             path: "epics",
             element: <ListEpics />

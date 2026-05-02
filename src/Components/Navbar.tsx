@@ -2,18 +2,13 @@ import { Menu } from "lucide-react";
 import logo from "../assets/logo.png";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Store/store";
+import { getInitials } from "@/Utils/GetInitials";
 
 export default function Navbar({ setIsMobileOpen }: { setIsMobileOpen?: (v: boolean) => void }) {
   const { user, loading } = useSelector((state: RootState) => state.auth);
 
   // Present Naming for logged in users only.
-  const initials =
-    user?.name
-      .split(" ")
-      .map((word: string) => word[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase() || "—";
+  const initials = getInitials(user?.name);
 
   return (
     <nav className="w-full bg-brightness-primary shadow-xl py-3 sm:py-4 px-4 sm:px-6 md:px-12 flex items-center z-50">

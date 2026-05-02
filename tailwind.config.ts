@@ -15,7 +15,8 @@ export default {
         },
         blue: {
           darkBlue: "#0A3B83",
-          lightBlue: "#01A2F9"
+          lightBlue: "#01A2F9",
+          formBlue: "#DBEAFE"
         },
         plusIcon: "#F4D7DA"
       },

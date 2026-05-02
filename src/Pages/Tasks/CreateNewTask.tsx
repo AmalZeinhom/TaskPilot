@@ -201,7 +201,7 @@ export default function Tasks() {
             </span>
             <input
               {...register("title")}
-              className="w-full bg-blue-100 rounded-md px-3 py-2 mt-2 text-sm"
+              className="w-full bg-blue-formBlue rounded-md px-3 py-2 mt-2 text-sm"
               placeholder="E.g., Design System Documentation"
             />
             {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
@@ -211,7 +211,7 @@ export default function Tasks() {
             <label className="text-sm">DESCRIPTION</label>
             <textarea
               {...register("description")}
-              className="w-full bg-blue-100 rounded-md px-3 py-2 text-sm"
+              className="w-full bg-blue-formBlue rounded-md px-3 py-2 text-sm"
               placeholder="Briefly describe the task scope..."
             />
           </div>
@@ -228,8 +228,8 @@ export default function Tasks() {
                     value={assigneeOptions.find((o) => o.value === field.value) || null}
                     onChange={(val) => field.onChange(val?.value)}
                     placeholder="Select a Team Member"
-                    className="bg-blue-100"
-                    controlBg="bg-blue-100"
+                    className="bg-blue-formBlue"
+                    controlBg="bg-blue-formBlue"
                   />
                 )}
               />
@@ -246,8 +246,8 @@ export default function Tasks() {
                     options={statusOptions()}
                     value={statusOptions().find((o) => o.value === field.value) || null}
                     onChange={(val) => field.onChange(val?.value)}
-                    className="bg-blue-100"
-                    controlBg="bg-blue-100"
+                    className="bg-blue-formBlue"
+                    controlBg="bg-blue-formBlue"
                   />
                 )}
               />
@@ -263,8 +263,8 @@ export default function Tasks() {
                   <CustomDatePicker
                     selectedDate={field.value ? new Date(field.value) : null}
                     onDateChange={(date) => field.onChange(date ? date.toISOString() : null)}
-                    className="bg-blue-100"
-                    inputClassName="bg-blue-100"
+                    className="bg-blue-formBlue"
+                    inputClassName="bg-blue-formBlue"
                   />
                 )}
               />
@@ -282,8 +282,8 @@ export default function Tasks() {
                     value={epicOptions.find((o) => o.value === field.value) || null}
                     onChange={(val) => field.onChange(val?.value)}
                     placeholder="Select an Epic"
-                    className="bg-blue-100"
-                    controlBg="bg-blue-100"
+                    className="bg-blue-formBlue"
+                    controlBg="bg-blue-formBlue"
                   />
                 )}
               />

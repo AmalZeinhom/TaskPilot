@@ -63,7 +63,8 @@ api.interceptors.response.use(
           {
             headers: {
               "Content-Type": "application/json",
-              apikey: supabasekey
+              apikey: supabasekey,
+              Authorization: `Bearer ${supabasekey}`
             }
           }
         );

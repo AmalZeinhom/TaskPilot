@@ -1,44 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import ProjectMemberSkeleton from "@/Common/ProjectMemberSkeleton";
-import api from "../API/axiosInstance";
 import { getInitials } from "@/Utils/GetInitials";
+import { getAvatarColor } from "@/Utils/GetAvatarColor";
 import Selector from "@/Utils/Selector";
 import { roleOptions } from "@/Constants/roleOptions";
+import InviteMembersModal from "./InviteMembersModal";
+import { useProjectMembers } from "@/hooks/useProjectMembers";
 
 export default function ProjectMembers() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [members, setMembers] = useState([]);
-
+  const [isInviteOpen, setInviteOpen] = useState(false);
   const { projectId } = useParams();
 
-  const isEmpty = !isLoading && members.length === 0;
+  const { members, loading, updateMemberRole } = useProjectMembers(projectId);
 
-  const fetchProjectMembers = async () => {
-    try {
-      const response = await api.get(`/rest/v1/get_project_members?project_id=eq.${projectId}`);
+  const isEmpty = !loading && members.length === 0;
 
-      const data = response.data;
-
-      setMembers(data);
-    } catch (error: any) {
-      console.error("Error fetching members:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!projectId) {
-      setIsLoading(false);
-      return;
-    }
-    fetchProjectMembers();
-  }, [projectId]);
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="mt-20">
         <ProjectMemberSkeleton />
@@ -88,30 +68,34 @@ export default function ProjectMembers() {
             </span>
           </div>
 
-          <Link
-            to="/invite-members"
+          <button
+            onClick={() => setInviteOpen(true)}
             className="w-full sm:w-auto bg-blue-darkBlue text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 text-center"
           >
             Invite Members
-          </Link>
+          </button>
         </motion.div>
 
         <div className="w-full bg-brightness-primary py-8 px-5 md:py-10 md:px-6 rounded-2xl shadow-2xl">
-          <h2 className="text-lg md:text-2xl font-semibold text-blue-darkBlue mb-2 text-start">
-            Project Members
-          </h2>
-          <p className="text-sm md:text-base text-gray-500 mb-6 text-start">
-            Invite your team members to collaborate on this project.
-          </p>
+          <div>
+            <h2 className="text-lg md:text-2xl font-semibold text-blue-darkBlue mb-2 text-start">
+              Project Members
+            </h2>
+            <p className="text-sm md:text-base text-gray-500 mb-6 text-start">
+              Invite your team members to collaborate on this project.
+            </p>
+          </div>
 
           {members.map((member: any) => (
             <div
-              key={member.id}
+              key={member.member_id}
               className="flex items-center justify-between bg-white rounded-lg p-4 mb-4 shadow"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full">
                 <div className="flex items-center gap-4">
-                  <span className="bg-gray-300 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-sm md:text-lg text-gray-600 font-semibold">
+                  <span
+                    className={`${getAvatarColor(member.metadata.name)} text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-sm md:text-lg font-semibold`}
+                  >
                     {getInitials(member.metadata.name)}
                   </span>
                   <span className="flex flex-col">
@@ -127,11 +111,9 @@ export default function ProjectMembers() {
                     options={roleOptions}
                     value={roleOptions.find((o) => o.value === member.role) || null}
                     onChange={(option) => {
-                      setMembers((prev: any) =>
-                        prev.map((m: any) =>
-                          m.id === member.id ? { ...m, role: option?.value } : m
-                        )
-                      );
+                      if (!option?.value) return;
+
+                      updateMemberRole(member.member_id, option.value);
                     }}
                   />
 
@@ -143,6 +125,7 @@ export default function ProjectMembers() {
             </div>
           ))}
         </div>
+        <InviteMembersModal isOpen={isInviteOpen} onClose={() => setInviteOpen(false)} />
       </motion.div>
     </div>
   );
