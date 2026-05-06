@@ -121,7 +121,7 @@ export default function BoardView() {
                 placeholder="Search tasks"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 rounded-lg bg-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 bg-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
               />
             </div>
 
@@ -181,7 +181,7 @@ export default function BoardView() {
                   ))}
                 </div>
               ) : (
-                <ListView />
+                <ListView searchTerm={debouncedSearch} />
               )}
             </>
           )}

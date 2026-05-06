@@ -1,6 +1,3 @@
-import api from "@/API/axiosInstance";
-import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Pagination from "@/Components/Pagination";
 import { Task } from "@/Types/Tasks";
@@ -9,58 +6,20 @@ import { statusColors } from "@/Constants/statusColors";
 import { MoreHorizontal, PlusCircle, MoreVertical } from "lucide-react";
 import { formatedDate } from "@/Utils/FormatedDate";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
+import useFetchTasks from "@/hooks/useFetchTasks";
 
-export default function ListView() {
+export default function ListView({ searchTerm }: { searchTerm: string }) {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 9;
-  const offset = (currentPage - 1) * limit;
+  const { tasks, loading, error, page, setPage, totalPages } = useFetchTasks(
+    projectId,
+    9,
+    searchTerm,
+    "pagination"
+  );
 
-  const [totalCount, setTotalCount] = useState(0);
-  const totalPages = Math.ceil(totalCount / limit);
-
-  async function fetchListTasks() {
-    try {
-      const response = await api.get("/rest/v1/project_tasks", {
-        params: {
-          project_id: `eq.${projectId}`,
-          limit,
-          offset,
-          order: "task_id.asc"
-        },
-        headers: {
-          Prefer: "count=exact"
-        }
-      });
-
-      const contentRange = response.headers["content-range"] || response.headers["Content-Range"];
-
-      if (contentRange) {
-        const total = contentRange.split("/")[1];
-        setTotalCount(Number(total));
-      }
-
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        navigate("/login");
-      }
-    }
-  }
-
-  const {
-    data: tasks = [],
-    isLoading,
-    isError
-  } = useQuery({
-    queryKey: ["tasks", projectId, currentPage],
-    queryFn: fetchListTasks,
-    placeholderData: (previous) => previous
-  });
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
         {[1, 2, 3].map((x) => (
@@ -70,21 +29,27 @@ export default function ListView() {
     );
   }
 
-  if (isError) {
+  if (error) {
     return <p className="text-red-500">Failed to load tasks</p>;
   }
 
-  if (!isLoading && tasks.length === 0) {
+  if (tasks.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-2">
-        <p className="text-gray-600 text-lg mb-3">No tasks added yet!.</p>
-        <Link
-          to={`/projects/${projectId}/tasks/new`}
-          className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition"
-        >
-          Create New Task
-        </Link>
-      </div>
+      <>
+        {searchTerm ? (
+          "No tasks found matching your search"
+        ) : (
+          <div className="min-h-screen flex flex-col items-center justify-center gap-2">
+            <p className="text-gray-600 text-lg mb-3">No tasks added yet!.</p>
+            <Link
+              to={`/projects/${projectId}/tasks/new`}
+              className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              Create New Task
+            </Link>
+          </div>
+        )}
+      </>
     );
   }
 
@@ -189,7 +154,7 @@ export default function ListView() {
         })}
       </div>
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
     </>
   );
 }
