@@ -1,7 +1,7 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { HiOutlineLightBulb } from "react-icons/hi";
-import { CiCalendar } from "react-icons/ci";
+import { CiCalendar, CiSearch } from "react-icons/ci";
 import { useEpics } from "@/hooks/useEpics";
 import { useState, useEffect } from "react";
 import EpicsModal from "@/Pages/Epics/EpicsModal";
@@ -80,12 +80,12 @@ export default function ListEpics() {
   }
 
   return (
-    <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-3 px-1 md:px-6">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-7xl mx-auto bg-brightness-light rounded-2xl p-6 sm:p-8 mb-8"
+        className="w-full mx-auto bg-brightness-light rounded-2xl p-6 md:p-8 mb-8"
       >
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -103,57 +103,74 @@ export default function ListEpics() {
             <span className="text-gray-700 font-medium">Epics</span>
           </div>
 
-          <Link
-            to={`/projects/${projectId}/epics/new`}
-            className="bg-blue-darkBlue text-white px-4 py-2 rounded-xl hover:bg-cyan-800 transition w-full sm:w-auto text-center"
-          >
-            + Create New Epic
-          </Link>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-3">
+            <div className="relative w-full md:w-80">
+              <CiSearch
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={16}
+              />
+              <input
+                type="text"
+                placeholder="Search Epics..."
+                className="w-full pl-10 pr-3 py-2 rounded-md border border-cyan-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <Link
+              to={`/projects/${projectId}/epics/new`}
+              className="bg-blue-darkBlue text-white px-4 py-2 rounded-md hover:bg-cyan-800 transition w-full sm:w-auto text-center"
+            >
+              + Create New Epic
+            </Link>
+          </div>
         </motion.div>
 
         {!loading && data.length > 0 && (
-          <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {data.map((epic) => {
               const assigneeInitials = getInitials(epic.assignee?.name || "Unassigned");
               const bgColor = getAvatarColor(epic.assignee?.name);
+
               return (
                 <div key={epic.id} onClick={() => setSelectedEpicId(epic.id)}>
-                  <div className="bg-brightness-primary rounded-xl shadow-xl p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 hover:cursor-pointer transition">
-                    <div className="flex flex-wrap items-center gap-6">
+                  <div className="bg-brightness-primary border-l-4 border-green-800 rounded-lg shadow-xl p-4 md:p-6 flex flex-col justify-between space-y-4 hover:cursor-pointer transition">
+                    <p className="text-sm bg-green-300 px-2 py-1 w-fit rounded-md">
+                      # {epic.epic_id}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-2">
                       <HiOutlineLightBulb size={24} />
                       <div className="flex flex-col gap-2">
                         <p className="font-bold text-sm">{epic.title}</p>
-
-                        <div className="flex items-center gap-3 text-xs">
-                          <p># {epic.epic_id}</p>
-                          <p>
-                            Opened by <span className="font-bold">{epic.created_by.name}</span>
-                          </p>
-                        </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-6">
-                      <div className="flex items-center lg:items-start lg:flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`rounded-lg ${bgColor} text-white w-10 h-10 flex items-center justify-center font-bold`}
+                      >
+                        {/* for ensure that the name is not Undefined */}
+                        <p className="text-md text-white font-semibold">{assigneeInitials}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm">Assignee</p>
+                        <p className="font-bold text-gray-500 text-sm">
+                          {epic.assignee?.name ?? "Unassigned"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-6">
+                      <p className="flex items-center gap-1 text-xs">
+                        Opened by <span className="font-bold">{epic.created_by.name}</span>
+                      </p>
+                      <div className="flex items-center gap-2">
                         <p className="text-xs font-bold text-darkness-iconList">Created At: </p>
                         <div className="flex items-center gap-1">
-                          <CiCalendar size={20} />
-                          <p className="text-gray-700 font-medium text-sm">
+                          <CiCalendar size={14} />
+                          <p className="text-gray-700 font-medium text-xs">
                             {formatedDate(epic.created_at)}
                           </p>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`rounded-full ${bgColor} text-white w-8 h-8 flex items-center justify-center font-bold`}
-                        >
-                          {/* for ensure that the name is not Undefined */}
-                          <p className="text-sm text-white font-semibold">{assigneeInitials}</p>
-                        </div>
-                        <p className="font-bold text-gray-500">
-                          {epic.assignee?.name ?? "Unassigned"}
-                        </p>
                       </div>
                     </div>
                   </div>
