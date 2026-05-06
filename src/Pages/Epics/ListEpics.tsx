@@ -71,36 +71,6 @@ export default function ListEpics() {
     return <p className="text-red-500 mx-auto">Failed to load Epics</p>;
   }
 
-  // if (loading) {
-  //   return (
-  //     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-  //       {[1, 2, 3].map((x) => (
-  //         <div key={x} className="h-32 w-full bg-gray-200 animate-pulse rounded-lg" />
-  //       ))}
-  //     </div>
-  //   );
-  // }
-
-  // if (!loading && data.length === 0) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col items-center justify-center gap-2">
-  //       {debouncedSearch ? (
-  //         <p>No epics found matches your search</p>
-  //       ) : (
-  //         <>
-  //           <p className="text-gray-600 text-lg mb-3">No epics found for this project.</p>
-  //           <Link
-  //             to={`/projects/${projectId}/epics/new`}
-  //             className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition"
-  //           >
-  //             Create New Epic
-  //           </Link>
-  //         </>
-  //       )}
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="min-h-screen py-3 px-1 md:px-6">
       <motion.div

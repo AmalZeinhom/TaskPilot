@@ -6,7 +6,7 @@ import { TaskStatus } from "@/Constants/taskStatus";
 import Column from "./Components/Column";
 
 import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import api from "@/API/axiosInstance";
 import toast from "react-hot-toast";
@@ -25,7 +25,14 @@ export default function BoardView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") || "board";
 
-  const { tasks, hasMore, loadMore, updateTask, error, loading } = useFetchTasks(projectId);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+
+  const { tasks, hasMore, loadMore, updateTask, error, loading } = useFetchTasks(
+    projectId,
+    20,
+    debouncedSearch
+  );
 
   const options = [
     { label: "Board View", value: "board" },
@@ -38,9 +45,7 @@ export default function BoardView() {
   const handleScroll = (e: any) => {
     const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 50;
 
-    if (bottom && hasMore) {
-      loadMore();
-    }
+    if (bottom && hasMore) loadMore();
   };
 
   function handleDragStart(event: any) {
@@ -70,18 +75,16 @@ export default function BoardView() {
     }
   }
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   if (error) {
     return <p className="text-red-500 mx-auto">Failed to load Tasks</p>;
-  }
-
-  if (loading) {
-    return (
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[1, 2, 3].map((x) => (
-          <div key={x} className="h-32 w-full bg-gray-200 animate-pulse rounded-lg" />
-        ))}
-      </div>
-    );
   }
 
   return (
@@ -116,6 +119,8 @@ export default function BoardView() {
               <input
                 type="text"
                 placeholder="Search tasks"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-3 py-2 rounded-lg bg-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
@@ -143,22 +148,42 @@ export default function BoardView() {
             )}
           </div>
 
-          {view === "board" ? (
-            <div
-              onScroll={handleScroll}
-              className="flex gap-4 overflow-y-auto flex-1 snap-x snap-mandatory scroll-smooth overscroll-x-contain touch-pan-x"
-            >
-              {TaskStatus.map((status) => (
-                <div
-                  key={status}
-                  className="min-w-[260px] sm:min-w-[280px] md:min-w-[320px] lg:min-w-[360px] flex-shrink-0 snap-start"
-                >
-                  <Column status={status} tasks={tasks.filter((t) => t.status === status)} />
-                </div>
+          {loading && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((x) => (
+                <div key={x} className="h-32 w-full bg-gray-200 animate-pulse rounded-lg" />
               ))}
             </div>
-          ) : (
-            <ListView />
+          )}
+
+          {!loading && tasks.length === 0 && (
+            <div className="text-center py-10">
+              {debouncedSearch
+                ? "No tasks found matching your search"
+                : "No tasks found for this project"}
+            </div>
+          )}
+
+          {!loading && tasks.length > 0 && (
+            <>
+              {view === "board" ? (
+                <div
+                  onScroll={handleScroll}
+                  className="flex gap-4 overflow-y-auto flex-1 snap-x snap-mandatory scroll-smooth overscroll-x-contain touch-pan-x"
+                >
+                  {TaskStatus.map((status) => (
+                    <div
+                      key={status}
+                      className="min-w-[260px] sm:min-w-[280px] md:min-w-[320px] lg:min-w-[360px] flex-shrink-0 snap-start"
+                    >
+                      <Column status={status} tasks={tasks.filter((t) => t.status === status)} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ListView />
+              )}
+            </>
           )}
         </div>
       </motion.div>
