@@ -4,30 +4,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Controller, useForm } from "react-hook-form";
-import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import api from "../../API/axiosInstance";
 import CustomDatePicker from "@/Utils/DatePicker";
 import { FaStarOfLife } from "react-icons/fa";
 import useProjectName from "@/hooks/useProjectName";
 import Selector from "@/Utils/Selector";
-
-const epicSchema = z.object({
-  title: z
-    .string()
-    .min(1, { message: "Epic Title is required!" })
-    .min(3, { message: "Epic Title must be at least 3 characters" })
-    .max(50, { message: "Epic Title must be at most 50 characters" })
-    .refine((val) => !/\s{2,}/.test(val), {
-      message: "Name cannot contain multiple consecutive spaces"
-    }),
-  description: z
-    .string()
-    .max(500, { message: "Message must be at most 500 characters" })
-    .optional(),
-  assignee: z.string().optional().nullable(),
-  deadline: z.string().nullable().optional()
-});
+import { epicSchema } from "@/Schema/EpicSchema";
+import useFetchMembers from "@/hooks/useFetchMembers";
+import { createEpicService } from "@/API/epicService";
 
 type FormData = z.infer<typeof epicSchema>;
 
@@ -38,6 +22,8 @@ export default function AddNewEpic() {
   const navigate = useNavigate();
 
   const [assigneeOptions, setAssigneeOptions] = useState<any[]>([]);
+
+  const { fetchAssignees } = useFetchMembers(setAssigneeOptions);
 
   if (!projectId) {
     toast.error("Project ID is missing!");
@@ -62,13 +48,7 @@ export default function AddNewEpic() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const accessToken = Cookies.get("access_token");
-      if (!accessToken) {
-        toast.error("User not authenticated!");
-        return;
-      }
-
-      const response = await api.post(`/rest/v1/epics`, {
+      await createEpicService({
         title: data.title,
         description: data.description,
         assignee_id: data.assignee,
@@ -76,12 +56,8 @@ export default function AddNewEpic() {
         project_id: projectId
       });
 
-      if (response.status !== 201 && response.status !== 200) {
-        toast.error("Failed to Create the Epic");
-        return;
-      }
+      toast.success("Epic Created Successfully");
 
-      toast.success("Epic Created Successfully.");
       reset();
     } catch (error: any) {
       toast.error(`Failed: ${error.response?.status} ${error.response?.data?.message || ""}`);
@@ -89,22 +65,7 @@ export default function AddNewEpic() {
   };
 
   useEffect(() => {
-    const fetchProjectMembers = async () => {
-      try {
-        const response = await api.get(`/rest/v1/get_project_members?project_id=eq.${projectId}`);
-
-        const mapped = response.data.map((m: any) => ({
-          label: m.metadata.name,
-          value: m.metadata.sub
-        }));
-
-        setAssigneeOptions(mapped);
-      } catch (error: any) {
-        console.log(error);
-      }
-    };
-
-    fetchProjectMembers();
+    fetchAssignees();
   }, [projectId]);
 
   return (
@@ -157,7 +118,7 @@ export default function AddNewEpic() {
           <div className="space-y-2">
             <label htmlFor="description" className="text-sm">
               DESCRIPTION
-              <p className="text-xs font-light text-gray-400">Optional</p>
+              <p className="text-xs font-light text-gray-400 mb-1">Optional</p>
             </label>
             <span>
               <textarea

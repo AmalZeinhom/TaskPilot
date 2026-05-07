@@ -10,36 +10,12 @@ import { FaStarOfLife } from "react-icons/fa";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import { useQueryClient } from "@tanstack/react-query";
 import useProjectName from "@/hooks/useProjectName";
+import { taskSchema } from "@/Schema/TaskSchema";
+import useFetchMembers from "@/hooks/useFetchMembers";
 
-const taskSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is Required!")
-    .min(3, "Title must be at least 3 characters")
-    .max(50, "Title must be at most 50 characters")
-    .refine((val) => !/\s{2,}/.test(val), {
-      message: "Name cannot contain multiple consecutive spaces"
-    }),
-  description: z.string().max(500).optional(),
-  project_id: z.string(),
-  epic_id: z.string().optional().nullable(),
-  assignee_id: z.string().optional().nullable(),
-  due_date: z.string().nullable().optional(),
-  status: z.enum([
-    "TO_DO",
-    "IN_PROGRESS",
-    "BLOCKED",
-    "IN_REVIEW",
-    "READY_FOR_QA",
-    "REOPENED",
-    "READY_FOR_PRODUCTION",
-    "DONE"
-  ])
-});
+import { createTaskService } from "@/API/taskService";
 
 type FormData = z.infer<typeof taskSchema>;
 
@@ -56,7 +32,7 @@ export default function Tasks() {
   const statusFormUrl = searchParams.get("status") as FormData["status"] | null;
   const projectName = useProjectName(projectId);
 
-  const queryClient = useQueryClient();
+  const { fetchAssignees } = useFetchMembers(setAssigneeOptions);
 
   const {
     register,
@@ -87,25 +63,6 @@ export default function Tasks() {
     title.length > maxLength ? title.slice(0, maxLength) + "..." : title;
 
   useEffect(() => {
-    const fetchAssignees = async () => {
-      try {
-        const res = await api.get("/rest/v1/get_project_members", {
-          params: {
-            project_id: `eq.${projectId}`
-          }
-        });
-
-        const mapped = res.data.map((m: any) => ({
-          label: m.metadata.name,
-          value: m.metadata.sub
-        }));
-
-        setAssigneeOptions(mapped);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchAssignees();
   }, [projectId]);
 
@@ -136,29 +93,21 @@ export default function Tasks() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const accessToken = Cookies.get("access_token");
-
-      if (!accessToken) {
-        toast.error("User not authenticated!");
-        return;
-      }
-
-      const response = await api.post(`/rest/v1/tasks`, {
-        ...data,
-        due_date: data.due_date ? new Date(data.due_date).toISOString() : null
+      await createTaskService({
+        title: data.title,
+        description: data.description,
+        assignee_id: data.assignee_id,
+        due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
+        epic_id: data.epic_id,
+        status: data.status,
+        project_id: projectId || ""
       });
-      if (response.status !== 201 && response.status !== 200) {
-        toast.error("Failed to Create the Task");
-        return;
-      }
-      toast.success("Task Created Successfully.");
-      queryClient.invalidateQueries({
-        queryKey: ["tasks", projectId]
-      });
+
+      toast.success("Task Created Successfully");
+
       navigate(`/projects/${projectId}/tasks`);
-    } catch (err: any) {
-      console.log("FULL ERROR:", err.response?.data);
-      console.log("STATUS:", err.response?.status);
+    } catch (error: any) {
+      toast.error(`Failed: ${error.response?.status} ${error.response?.data?.message || ""}`);
     }
   };
 
@@ -201,7 +150,7 @@ export default function Tasks() {
             </span>
             <input
               {...register("title")}
-              className="w-full bg-blue-formBlue rounded-md px-3 py-2 mt-2 text-sm"
+              className="w-full bg-blue-formBlue rounded-md px-3 py-2 mt-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
               placeholder="E.g., Design System Documentation"
             />
             {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
@@ -213,7 +162,7 @@ export default function Tasks() {
               <textarea
                 rows={4}
                 {...register("description")}
-                className="w-full bg-blue-formBlue rounded-md px-3 py-2 text-sm"
+                className="w-full bg-blue-formBlue rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
                 placeholder="Briefly describe the task scope..."
               />
               <p className="text-xs font-light flex justify-end text-gray-400">0/500 Characters</p>
