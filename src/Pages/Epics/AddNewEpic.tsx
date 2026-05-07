@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Controller, useForm } from "react-hook-form";
@@ -9,8 +8,11 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import api from "../../API/axiosInstance";
 import CustomDatePicker from "@/Utils/DatePicker";
+import { FaStarOfLife } from "react-icons/fa";
+import useProjectName from "@/hooks/useProjectName";
+import Selector from "@/Utils/Selector";
 
-const schema = z.object({
+const epicSchema = z.object({
   title: z
     .string()
     .min(1, { message: "Epic Title is required!" })
@@ -23,43 +25,24 @@ const schema = z.object({
     .string()
     .max(500, { message: "Message must be at most 500 characters" })
     .optional(),
-  assignee: z.string().optional(),
-  deadline: z
-    .date()
-    .optional()
-    .refine(
-      (val) => {
-        if (!val) return true;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return val >= today;
-      },
-      { message: "Deadline cannot be in the past" }
-    )
+  assignee: z.string().optional().nullable(),
+  deadline: z.string().nullable().optional()
 });
 
-type FormData = z.infer<typeof schema>;
-
-interface Member {
-  member_id: string;
-  user_id: string;
-  metadata: {
-    name: string;
-    email: string;
-  };
-}
+type FormData = z.infer<typeof epicSchema>;
 
 export default function AddNewEpic() {
-  const params = useParams();
-  const projectId = params.projectId as string | undefined;
+  const { projectId } = useParams<{ projectId: string }>();
+  const projectName = useProjectName(projectId);
+
   const navigate = useNavigate();
-  const [members, setMembers] = useState<Member[]>([]);
+
+  const [assigneeOptions, setAssigneeOptions] = useState<any[]>([]);
 
   if (!projectId) {
     toast.error("Project ID is missing!");
     return null;
   }
-  const projectName = new URLSearchParams(window.location.search).get("projectName") || "Project";
 
   const {
     handleSubmit,
@@ -68,8 +51,11 @@ export default function AddNewEpic() {
     reset,
     formState: { errors, isSubmitting }
   } = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(epicSchema),
     defaultValues: {
+      title: "",
+      description: "",
+      assignee: null,
       deadline: undefined
     }
   });
@@ -105,15 +91,14 @@ export default function AddNewEpic() {
   useEffect(() => {
     const fetchProjectMembers = async () => {
       try {
-        const accessToken = Cookies.get("access_token");
-        if (!accessToken) {
-          toast.error("Member Not Authorized!");
-          return;
-        }
-
         const response = await api.get(`/rest/v1/get_project_members?project_id=eq.${projectId}`);
 
-        setMembers(response.data);
+        const mapped = response.data.map((m: any) => ({
+          label: m.metadata.name,
+          value: m.metadata.sub
+        }));
+
+        setAssigneeOptions(mapped);
       } catch (error: any) {
         console.log(error);
       }
@@ -123,12 +108,12 @@ export default function AddNewEpic() {
   }, [projectId]);
 
   return (
-    <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-center items-center md:py-6 md:px-4 px-2">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-7xl bg-brightness-light rounded-2xl p-8 sm:p-8 md:p-10"
+        className="w-full bg-brightness-light rounded-2xl md:p-8 lg:p-6 p-4"
       >
         <div className="flex flex-wrap gap-2 mx-auto mb-6 text-sm">
           <Link to={"/projects"} className="cursor-pointer text-gray-500 hover:text-gray-700">
@@ -148,88 +133,90 @@ export default function AddNewEpic() {
         </div>
 
         <form
-          className="w-full bg-brightness-primary py-10 px-5 sm:py-8 sm:px-6 rounded-2xl shadow-2xl"
+          className="w-full bg-brightness-primary md:py-10 md:px-5 py-8 px-4 rounded-md shadow-2xl space-y-6"
           noValidate
           onSubmit={handleSubmit(onSubmit)}
         >
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            {...register("title")}
-            className="w-full min-h-11 border-2 border-gray-400 rounded-xl focus:shadow-xl focus:border-gray-500 outline-none px-3 py-2 mt-2 mb-5"
-          />
-          {errors.title && <p className="text-red-600 text-sm mb-4">{errors.title.message}</p>}
+          <div className="space-y-2">
+            <span className="flex items-center gap-1">
+              <label className="text-sm" htmlFor="title">
+                TITLE
+              </label>
+              <FaStarOfLife className="text-red-400" size={10} />
+            </span>
+            <input
+              type="text"
+              id="title"
+              {...register("title")}
+              className="w-full bg-blue-formBlue rounded-md px-3 py-2 mt-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+              placeholder="E.g. Design System Documentation"
+            />
+            {errors.title && <p className="text-red-600 text-sm mb-4">{errors.title.message}</p>}
+          </div>
 
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            {...register("description")}
-            className="w-full min-h-28 sm:min-h-32 border-2 border-gray-400 rounded-xl focus:shadow-xl focus:border-gray-500 outline-none px-3 py-2 mt-2 mb-5"
-          />
-          {errors.description && (
-            <p className="text-red-600 text-sm mb-4">{errors.description.message}</p>
-          )}
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm">
+              DESCRIPTION
+              <p className="text-xs font-light text-gray-400">Optional</p>
+            </label>
+            <span>
+              <textarea
+                id="description"
+                rows={4}
+                {...register("description")}
+                placeholder="Descripe the scope and objectives of this epic..."
+                className="w-full bg-blue-formBlue rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+              />
+              <p className="text-xs font-light flex justify-end text-gray-400">0/500 Characters</p>
+            </span>
+            {errors.description && (
+              <p className="text-red-600 text-sm mb-4">{errors.description.message}</p>
+            )}
+          </div>
 
-          <div className="grid grid-cols-1 gap-6 mb-6">
-            <div>
-              <label htmlFor="assignee">Assign to</label>
-
-              <div className="relative w-full sm:w-[25%] mt-2">
-                <select
-                  {...register("assignee")}
-                  id="assignee"
-                  className="w-full h-11 border-2 border-gray-400 rounded-xl px-3 pr-10 appearance-none focus:shadow-xl focus:border-gray-500 outline-none"
-                >
-                  <option value="">Select Assignee</option>
-
-                  {members.map((member) => (
-                    <option key={member.member_id} value={member.user_id}>
-                      {member.metadata.name}
-                    </option>
-                  ))}
-                </select>
-
-                <ChevronDown
-                  size={20}
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
-                />
-              </div>
-
-              {errors.assignee && (
-                <p className="text-red-600 text-sm mt-1">{errors.assignee.message}</p>
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm">ASSIGNEE</p>
+              <Controller
+                control={control}
+                name="assignee"
+                render={({ field }) => (
+                  <Selector
+                    options={assigneeOptions}
+                    value={assigneeOptions.find((m) => m.value === field.value) || null}
+                    onChange={(val) => field.onChange(val?.value)}
+                    placeholder="Select a Team Member"
+                    className="bg-blue-formBlue rounded-md"
+                    controlBg="bg-blue-formBlue rounded-md"
+                  />
+                )}
+              />
             </div>
 
-            <div>
-              <label>Deadline</label>
-
-              <div className="mt-2 w-full sm:w-[25%]">
-                <Controller
-                  name="deadline"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomDatePicker
-                      selectedDate={field.value ?? null}
-                      onDateChange={field.onChange}
-                    />
-                  )}
-                />
-              </div>
-
-              {errors.deadline && (
-                <p className="text-red-600 text-sm mt-1">{errors.deadline.message}</p>
-              )}
+            <div className="flex flex-col gap-2">
+              <p className="text-sm">DUE DATE</p>
+              <Controller
+                control={control}
+                name="deadline"
+                render={({ field }) => (
+                  <CustomDatePicker
+                    selectedDate={field.value ? new Date(field.value) : null}
+                    onDateChange={(date) => field.onChange(date ? date.toISOString() : null)}
+                    className="bg-blue-formBlue rounded-md"
+                    inputClassName="bg-blue-formBlue rounded-md"
+                  />
+                )}
+              />
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
+          <div className="flex flex-col md:flex-row justify-end gap-4 mt-6">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isSubmitting}
-              className={`w-full sm:w-auto bg-blue-darkBlue text-white font-semibold px-6 py-2 rounded-xl shadow-2xl transition-colors duration-300 ${
+              className={`w-full sm:w-auto bg-blue-darkBlue text-white font-semibold px-6 py-2 rounded-md shadow-2xl transition-colors duration-300 ${
                 isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-cyan-800"
               }`}
             >
@@ -241,7 +228,7 @@ export default function AddNewEpic() {
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={() => navigate(`/projects/${projectId}/epics`)}
-              className="w-full sm:w-auto bg-blue-lightBlue text-white font-semibold px-6 py-2 rounded-xl shadow-2xl hover:bg-cyan-800 transition-colors duration-300"
+              className="w-full sm:w-auto px-6 py-1 rounded-md bg-gray-200"
             >
               Cancel
             </motion.button>

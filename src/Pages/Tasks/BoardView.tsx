@@ -158,9 +158,19 @@ export default function BoardView() {
 
           {!loading && tasks.length === 0 && (
             <div className="text-center py-10">
-              {debouncedSearch
-                ? "No tasks found matching your search"
-                : "No tasks found for this project"}
+              {debouncedSearch ? (
+                "No tasks found matching your search"
+              ) : (
+                <>
+                  <p className="text-gray-600 text-lg mb-3">No epics found for this project.</p>
+                  <Link
+                    to={`/projects/${projectId}/tasks/new`}
+                    className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition"
+                  >
+                    Create New Task
+                  </Link>
+                </>
+              )}
             </div>
           )}
 

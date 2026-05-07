@@ -209,11 +209,18 @@ export default function Tasks() {
 
           <div className="space-y-2">
             <label className="text-sm">DESCRIPTION</label>
-            <textarea
-              {...register("description")}
-              className="w-full bg-blue-formBlue rounded-md px-3 py-2 text-sm"
-              placeholder="Briefly describe the task scope..."
-            />
+            <span>
+              <textarea
+                rows={4}
+                {...register("description")}
+                className="w-full bg-blue-formBlue rounded-md px-3 py-2 text-sm"
+                placeholder="Briefly describe the task scope..."
+              />
+              <p className="text-xs font-light flex justify-end text-gray-400">0/500 Characters</p>
+            </span>
+            {errors.description && (
+              <p className="text-red-600 text-sm mb-4">{errors.description.message}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -228,8 +235,8 @@ export default function Tasks() {
                     value={assigneeOptions.find((o) => o.value === field.value) || null}
                     onChange={(val) => field.onChange(val?.value)}
                     placeholder="Select a Team Member"
-                    className="bg-blue-formBlue"
-                    controlBg="bg-blue-formBlue"
+                    className="bg-blue-formBlue rounded-md"
+                    controlBg="bg-blue-formBlue rounded-md"
                   />
                 )}
               />
@@ -246,8 +253,8 @@ export default function Tasks() {
                     options={statusOptions()}
                     value={statusOptions().find((o) => o.value === field.value) || null}
                     onChange={(val) => field.onChange(val?.value)}
-                    className="bg-blue-formBlue"
-                    controlBg="bg-blue-formBlue"
+                    className="bg-blue-formBlue rounded-md"
+                    controlBg="bg-blue-formBlue rounded-md"
                   />
                 )}
               />
@@ -263,8 +270,8 @@ export default function Tasks() {
                   <CustomDatePicker
                     selectedDate={field.value ? new Date(field.value) : null}
                     onDateChange={(date) => field.onChange(date ? date.toISOString() : null)}
-                    className="bg-blue-formBlue"
-                    inputClassName="bg-blue-formBlue"
+                    className="bg-blue-formBlue rounded-md"
+                    inputClassName="bg-blue-formBlue rounded-md"
                   />
                 )}
               />
@@ -282,21 +289,23 @@ export default function Tasks() {
                     value={epicOptions.find((o) => o.value === field.value) || null}
                     onChange={(val) => field.onChange(val?.value)}
                     placeholder="Select an Epic"
-                    className="bg-blue-formBlue"
-                    controlBg="bg-blue-formBlue"
+                    className="bg-blue-formBlue rounded-md"
+                    controlBg="bg-blue-formBlue rounded-md"
                   />
                 )}
               />
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+          <div className="flex flex-col md:flex-row justify-end gap-4 mt-6">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-darkBlue text-white w-full sm:w-auto px-6 py-3 rounded-xl"
+              className={`w-full sm:w-auto bg-blue-darkBlue text-white font-semibold px-6 py-2 rounded-md shadow-2xl transition-colors duration-300 ${
+                isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-cyan-800"
+              }`}
             >
               {isSubmitting ? "Creating..." : "Create Task"}
             </motion.button>
@@ -304,7 +313,7 @@ export default function Tasks() {
             <button
               type="button"
               onClick={() => navigate(`/projects/${projectId}/tasks`)}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gray-200"
+              className="w-full sm:w-auto px-6 py-1 rounded-md bg-gray-200"
             >
               Cancel
             </button>

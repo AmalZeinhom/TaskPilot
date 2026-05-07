@@ -16,13 +16,17 @@ export default function CustomDatePicker({
   inputClassName = ""
 }: DatePickerProps) {
   return (
-    <div className={`relative w-full hover:cursor-pointer transition ${className}`}>
+    <div
+      className={`relative w-full focus-within:ring-2
+        focus-within:ring-blue-500
+        transition ${className}`}
+    >
       <DatePicker
         selected={selectedDate}
         onChange={onDateChange}
         minDate={new Date()}
         placeholderText="Pick a Date"
-        className={`w-full h-11 rounded-md px-3 pr-10 ${inputClassName}`}
+        className={`w-full h-11 rounded-md px-3 pr-10 outline-none bg-transparent ${inputClassName}`}
       />
 
       <Calendar1Icon
