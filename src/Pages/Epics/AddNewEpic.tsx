@@ -163,7 +163,7 @@ export default function AddNewEpic() {
                   <CustomDatePicker
                     selectedDate={field.value ? new Date(field.value) : null}
                     onDateChange={(date) => field.onChange(date ? date.toISOString() : null)}
-                    className="bg-blue-formBlue rounded-md"
+                    className="bg-blue-formBlue rounded-md px-3"
                     inputClassName="bg-blue-formBlue rounded-md"
                   />
                 )}

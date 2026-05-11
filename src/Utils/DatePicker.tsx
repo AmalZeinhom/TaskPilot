@@ -26,7 +26,7 @@ export default function CustomDatePicker({
         onChange={onDateChange}
         minDate={new Date()}
         placeholderText="Pick a Date"
-        className={`w-full h-11 rounded-md px-3 pr-10 outline-none bg-transparent ${inputClassName}`}
+        className={`w-full h-11 rounded-md outline-none bg-transparent ${inputClassName}`}
       />
 
       <Calendar1Icon
