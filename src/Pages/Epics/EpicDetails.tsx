@@ -228,6 +228,7 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
               <table className="w-full border-collapse px-4">
                 <tbody>
                   {data.map((task) => {
+                    console.log(data);
                     const assigneeInitials = getInitials(task.assignee?.name || "Unassigned");
 
                     const bgColor = getAvatarColor(task.assignee?.name);
@@ -239,9 +240,19 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                           <span>
                             <p className="font-medium text-gray-800 truncate">{task.title}</p>
                             <div className="flex items-center gap-2">
-                              <span className={`${bgColor} text-white text-[8px] rounded-full p-1`}>
-                                {assigneeInitials}
-                              </span>
+                              {task.assignee?.avatar ? (
+                                <img
+                                  src={task.assignee.avatar}
+                                  alt={task.assignee.avatar}
+                                  className="w-6 h-6 rounded-full object-cover"
+                                />
+                              ) : (
+                                <span
+                                  className={`${bgColor} text-white text-[8px] rounded-full p-1`}
+                                >
+                                  {assigneeInitials}
+                                </span>
+                              )}
 
                               <p className="text-xs text-gray-500">
                                 {task.assignee?.name || "Unassigned"}
@@ -249,7 +260,6 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                             </div>
                           </span>
                         </td>
-
                         <td className="p-1 text-gray-600">
                           <p className="text-[10px] text-gray-500">DUE DATE</p>
                           <p className="text-xs text-gray-600">{formatedDate(task.due_date)}</p>

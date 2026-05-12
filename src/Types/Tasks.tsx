@@ -11,5 +11,6 @@ export type Task = {
     name: string;
     email: string;
     department: string;
+    avatar?: string | null;
   } | null;
 };
