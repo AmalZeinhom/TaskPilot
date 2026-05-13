@@ -14,11 +14,14 @@ import TaskCard from "./Components/TaskCard";
 import Selector from "@/Utils/Selector";
 import ListView from "./ListView";
 import useFetchTasks from "@/hooks/useFetchTasks";
+import TaskDetailsModal from "./TaskDetails";
 
 export default function BoardView() {
   const { projectId } = useParams<{ projectId: string }>();
   const projectName = useProjectName(projectId);
   const navigate = useNavigate();
+
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const [activeTask, setActiveTask] = useState<any>(null);
 
@@ -57,7 +60,7 @@ export default function BoardView() {
 
     setActiveTask(null);
 
-    if (!over) return;
+    if (!over || active.id === over.id) return;
 
     const taskId = active.id;
     const newStatus = over.id;
@@ -186,7 +189,11 @@ export default function BoardView() {
                       key={status}
                       className="min-w-[260px] sm:min-w-[280px] md:min-w-[320px] lg:min-w-[360px] flex-shrink-0 snap-start"
                     >
-                      <Column status={status} tasks={tasks.filter((t) => t.status === status)} />
+                      <Column
+                        status={status}
+                        tasks={tasks.filter((t) => t.status === status)}
+                        onTaskClick={(task) => setSelectedTaskId(task.id)}
+                      />
                     </div>
                   ))}
                 </div>
@@ -196,6 +203,12 @@ export default function BoardView() {
             </>
           )}
         </div>
+        <TaskDetailsModal
+          isOpen={!!selectedTaskId}
+          taskId={selectedTaskId ?? undefined}
+          projectId={projectId}
+          onClose={() => setSelectedTaskId(null)}
+        />
       </motion.div>
 
       {/* Virtual Card for Drag Overlay */}

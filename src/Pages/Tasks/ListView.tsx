@@ -7,10 +7,13 @@ import { MoreHorizontal, PlusCircle, MoreVertical } from "lucide-react";
 import { formatedDate } from "@/Utils/FormatedDate";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
 import useFetchTasks from "@/hooks/useFetchTasks";
+// import { useState } from "react";
 
 export default function ListView({ searchTerm }: { searchTerm: string }) {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+
+  // const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { tasks, loading, error, page, setPage, totalPages } = useFetchTasks(
     projectId,

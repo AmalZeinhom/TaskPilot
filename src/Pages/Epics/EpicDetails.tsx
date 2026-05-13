@@ -204,7 +204,7 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
             ))}
           </div>
         ) : data.length === 0 ? (
-          <div>
+          <div className="flex flex-col justify-center items-center gap-6">
             <LuList size={40} className="text-blue-500 bg-blue-200 rounded-md p-2" />
 
             <p className="font-semibold text-sm md:text-lg text-gray-600">

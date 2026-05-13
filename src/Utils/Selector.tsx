@@ -12,12 +12,14 @@ type AppSelectProps = {
   placeholder?: string;
   className?: string; // Affect the wrapper arround the selector component.
   controlBg?: string; // Affect the selector control bacground itself.
+  controlText?: string;
 };
 
-const getCustomStyles = (controlBg?: string) => ({
+const getCustomStyles = (controlBg?: string, controlText?: string) => ({
   control: (base: any, state: any) => ({
     ...base,
     backgroundColor: controlBg || "#fff",
+    color: controlText || "#000",
     borderColor: state.isFocused ? "#3b82f6" : "#e5e7eb",
     boxShadow: state.isFocused ? "0 0 0 1px #3b82f6" : "none",
     borderRadius: "6px",
@@ -32,6 +34,10 @@ const getCustomStyles = (controlBg?: string) => ({
   placeholder: (base: any) => ({
     ...base,
     color: "#94a3b8"
+  }),
+  singleValue: (base: any) => ({
+    ...base,
+    color: controlText || "#000"
   })
 });
 
@@ -41,7 +47,8 @@ export default function Selector({
   onChange,
   placeholder,
   className = "",
-  controlBg
+  controlBg,
+  controlText
 }: AppSelectProps) {
   return (
     <div className={className}>
@@ -50,7 +57,7 @@ export default function Selector({
         value={value}
         onChange={(option) => onChange(option as OptionType | null)}
         placeholder={placeholder}
-        styles={getCustomStyles(controlBg)}
+        styles={getCustomStyles(controlBg, controlText)}
       />
     </div>
   );

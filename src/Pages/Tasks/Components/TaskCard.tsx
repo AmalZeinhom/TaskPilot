@@ -3,8 +3,15 @@ import { useDraggable } from "@dnd-kit/core";
 import { formatedDate } from "@/Utils/FormatedDate";
 import { getInitials } from "@/Utils/GetInitials";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
+import { Task } from "@/Types/Tasks";
 
-export default function TaskCard({ task, isOverlay = false }: any) {
+interface TaskCardProps {
+  task: Task;
+  isOverlay?: boolean;
+  onClick?: () => void;
+}
+
+export default function TaskCard({ task, isOverlay = false, onClick }: TaskCardProps) {
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: task.id,
     data: task,
@@ -17,13 +24,16 @@ export default function TaskCard({ task, isOverlay = false }: any) {
   return (
     <div
       ref={setNodeRef}
-      {...(!isOverlay ? listeners : {})}
-      {...(!isOverlay ? attributes : {})}
+      onClick={onClick}
       className={`bg-white flex flex-col justify-between border min-h-[140px] border-gray-200 rounded-lg p-4 shadow-sm transition ${
         !isOverlay ? "hover:shadow-md cursor-grab" : "shadow-lg opacity-90"
       }`}
     >
-      <div>
+      <div
+        {...(!isOverlay ? listeners : {})}
+        {...(!isOverlay ? attributes : {})}
+        className="cursor-grab"
+      >
         <div className="flex justify-between items-start">
           <h4 className="text-sm font-semibold text-gray-800">{task.title}</h4>
           <MoreHorizontal size={16} className="text-gray-400 cursor-pointer" />

@@ -5,7 +5,13 @@ import { statusColors } from "@/Constants/statusColors";
 import { useDroppable } from "@dnd-kit/core";
 import { Task } from "@/Types/Tasks";
 
-export default function Column({ status, tasks }: { status: string; tasks: Task[] }) {
+interface ColumnProps {
+  status: string;
+  tasks: Task[];
+  onTaskClick: (task: Task) => void;
+}
+
+export default function Column({ status, tasks, onTaskClick }: ColumnProps) {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
@@ -35,7 +41,9 @@ export default function Column({ status, tasks }: { status: string; tasks: Task[
         {tasks.length === 0 ? (
           <p className="text-gray-400 text-sm text-center">No tasks</p>
         ) : (
-          tasks.map((task) => <TaskCard key={task.id} task={task} />)
+          tasks.map((task) => (
+            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+          ))
         )}
       </div>
     </div>

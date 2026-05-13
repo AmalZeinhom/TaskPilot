@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 type ModalProps = {
   isOpen: boolean;
@@ -8,6 +8,18 @@ type ModalProps = {
 
 const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   if (!isOpen) return null;
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center" onClick={onClose}>
