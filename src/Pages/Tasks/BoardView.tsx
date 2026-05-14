@@ -60,10 +60,16 @@ export default function BoardView() {
 
     setActiveTask(null);
 
-    if (!over || active.id === over.id) return;
+    if (!over) return;
 
     const taskId = active.id;
     const newStatus = over.id;
+
+    const currentTask = tasks.find((t) => t.id === taskId);
+
+    if (!currentTask) return;
+
+    if (currentTask.status === newStatus) return;
 
     try {
       await api.patch(`/rest/v1/tasks?id=eq.${taskId}`, {
@@ -187,7 +193,7 @@ export default function BoardView() {
                   {TaskStatus.map((status) => (
                     <div
                       key={status}
-                      className="min-w-[260px] sm:min-w-[280px] md:min-w-[320px] lg:min-w-[360px] flex-shrink-0 snap-start"
+                      className="min-w-[260px] md:min-w-[320px] lg:min-w-[360px] flex-shrink-0 snap-start"
                     >
                       <Column
                         status={status}
