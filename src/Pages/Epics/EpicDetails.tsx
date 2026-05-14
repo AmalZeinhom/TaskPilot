@@ -226,11 +226,10 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="w-full border-collapse px-4">
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="w-full border-collapse">
                 <tbody>
                   {data.map((task) => {
-                    console.log(data);
                     const assigneeInitials = getInitials(task.assignee?.name || "Unassigned");
 
                     const bgColor = getAvatarColor(task.assignee?.name);
@@ -238,7 +237,7 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                     return (
                       <tr
                         key={task.id}
-                        className="bg-blue-100 cursor-pointer"
+                        className="bg-blue-100 cursor-pointer space-y-3 border border-gray-300"
                         onClick={() => setSelectedTaskId(task.id)}
                       >
                         <td className="p-4 flex items-center gap-2">

@@ -106,7 +106,7 @@ export default function BoardView() {
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="h-[100dvh] flex flex-col px-1 md:px-6"
+        className="min-h-[100svh] flex flex-col px-1 md:px-6"
       >
         <div className="flex gap-2 text-sm mb-6">
           <Link to="/projects" className="text-gray-500">

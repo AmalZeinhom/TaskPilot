@@ -64,7 +64,7 @@ export default function ProjectsList() {
 
             <Link
               to={"/add-new-project"}
-              className="px-4 py-2 max-w-[55%] sm:max-w-[50%] bg-blue-darkBlue text-brightness-primary rounded-lg hover:bg-blue-800 transition"
+              className="px-4 py-2 text-center bg-blue-darkBlue text-brightness-primary rounded-lg hover:bg-blue-800 transition"
             >
               Add New Project
             </Link>
