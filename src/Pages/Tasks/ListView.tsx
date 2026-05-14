@@ -7,13 +7,15 @@ import { MoreHorizontal, PlusCircle, MoreVertical } from "lucide-react";
 import { formatedDate } from "@/Utils/FormatedDate";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
 import useFetchTasks from "@/hooks/useFetchTasks";
+import { useState } from "react";
+import TaskDetailsModal from "./TaskDetails";
 // import { useState } from "react";
 
 export default function ListView({ searchTerm }: { searchTerm: string }) {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
-  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { tasks, loading, error, page, setPage, totalPages } = useFetchTasks(
     projectId,
@@ -84,7 +86,11 @@ export default function ListView({ searchTerm }: { searchTerm: string }) {
               const bgColor = getAvatarColor(task.assignee?.name);
 
               return (
-                <tr key={task.id} className="border-t hover:bg-gray-50">
+                <tr
+                  key={task.id}
+                  className="border-t hover:bg-gray-50 cursor-pointer"
+                  onClick={() => setSelectedTaskId(task.id)}
+                >
                   <td className="px-4 py-3 text-blue-600">{task.task_id}</td>
 
                   <td className="px-4 py-3 text-gray-700">{task.title}</td>
@@ -114,6 +120,13 @@ export default function ListView({ searchTerm }: { searchTerm: string }) {
             })}
           </tbody>
         </table>
+
+        <TaskDetailsModal
+          isOpen={!!selectedTaskId}
+          taskId={selectedTaskId ?? undefined}
+          projectId={projectId}
+          onClose={() => setSelectedTaskId(null)}
+        />
       </div>
 
       {/* Mobile View */}
@@ -125,7 +138,8 @@ export default function ListView({ searchTerm }: { searchTerm: string }) {
           return (
             <div
               key={task.id}
-              className="bg-brightness-primary py-6 px-4 rounded-xl shadow-xl flex flex-col justify-between"
+              onClick={() => setSelectedTaskId(task.id)}
+              className="bg-brightness-primary py-6 px-4 rounded-xl shadow-xl flex flex-col justify-between cursor-pointer"
             >
               <div className="flex justify-between py-3">
                 <h2 className="text-blue-600">{task.task_id}</h2>
@@ -155,6 +169,13 @@ export default function ListView({ searchTerm }: { searchTerm: string }) {
             </div>
           );
         })}
+
+        <TaskDetailsModal
+          isOpen={!!selectedTaskId}
+          taskId={selectedTaskId ?? undefined}
+          projectId={projectId}
+          onClose={() => setSelectedTaskId(null)}
+        />
       </div>
 
       <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

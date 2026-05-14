@@ -13,6 +13,7 @@ import { GiFullFolder } from "react-icons/gi";
 import { LuList } from "react-icons/lu";
 import { PlusIcon, PlusCircle } from "lucide-react";
 import useListTasks from "@/hooks/useListTasks";
+import TaskDetailsModal from "../Tasks/TaskDetails";
 
 interface Member {
   user_id: string;
@@ -30,6 +31,7 @@ interface EpicDetailsProps {
 export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(true);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -234,7 +236,11 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                     const bgColor = getAvatarColor(task.assignee?.name);
 
                     return (
-                      <tr key={task.id} className="bg-blue-100">
+                      <tr
+                        key={task.id}
+                        className="bg-blue-100 cursor-pointer"
+                        onClick={() => setSelectedTaskId(task.id)}
+                      >
                         <td className="p-4 flex items-center gap-2">
                           <CheckCircle2 size={20} className="text-blue-darkBlue hidden md:block" />
                           <span>
@@ -269,6 +275,13 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                   })}
                 </tbody>
               </table>
+
+              <TaskDetailsModal
+                isOpen={!!selectedTaskId}
+                taskId={selectedTaskId ?? undefined}
+                projectId={projectId}
+                onClose={() => setSelectedTaskId(null)}
+              />
             </div>
 
             <button
