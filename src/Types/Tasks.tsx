@@ -4,6 +4,10 @@ export type Task = {
   title: string;
   description: string;
   due_date: string;
+  created_by: {
+    id: string;
+    name: string;
+  };
   created_at: string;
   status: string;
   project_id: string;
