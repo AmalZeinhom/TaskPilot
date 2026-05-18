@@ -1,5 +1,5 @@
 import Modal from "@/Components/Modal";
-import useProjectName from "@/hooks/useProjectName";
+import useProjectName from "@/hooks/Projects/useProjectName";
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { UserPlusIcon, XIcon } from "lucide-react";

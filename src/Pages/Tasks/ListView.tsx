@@ -6,7 +6,7 @@ import { statusColors } from "@/Constants/statusColors";
 import { MoreHorizontal, PlusCircle, MoreVertical } from "lucide-react";
 import { formatedDate } from "@/Utils/FormatedDate";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
-import useFetchTasks from "@/hooks/useFetchTasks";
+import useFetchTasks from "@/hooks/Tasks/useFetchTasks";
 import { useState } from "react";
 import TaskDetailsModal from "./TaskDetails";
 // import { useState } from "react";

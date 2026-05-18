@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import useProjectName from "@/hooks/useProjectName";
+import useProjectName from "@/hooks/Projects/useProjectName";
 import { SearchIcon, PlusIcon } from "lucide-react";
 import { TaskStatus } from "@/Constants/taskStatus";
 import Column from "./Components/Column";
@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import TaskCard from "./Components/TaskCard";
 import Selector from "@/Utils/Selector";
 import ListView from "./ListView";
-import useFetchTasks from "@/hooks/useFetchTasks";
+import useFetchTasks from "@/hooks/Tasks/useFetchTasks";
 import TaskDetailsModal from "./TaskDetails";
 
 export default function BoardView() {

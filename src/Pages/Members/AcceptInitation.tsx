@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import logo from "@/assets/logo.png";
 import { MdOutlineFolderShared } from "react-icons/md";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import useAcceptInvitation from "@/hooks/useAcceptInvitation";
+import useAcceptInvitation from "@/hooks/Members/useAcceptInvitation";
 import Cookies from "js-cookie";
 import { useEffect, useMemo } from "react";
 import toast from "react-hot-toast";

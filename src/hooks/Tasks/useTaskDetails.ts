@@ -24,6 +24,7 @@ export default function useTaskDetails({ taskId, projectId, enabled = true }: Us
         const res = await api.get(
           `/rest/v1/project_tasks?project_id=eq.${projectId}&id=eq.${taskId}`
         );
+        console.log(res);
 
         setData(res.data?.[0] ?? null);
       } catch (err) {

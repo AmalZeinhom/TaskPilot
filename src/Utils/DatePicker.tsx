@@ -7,32 +7,37 @@ type DatePickerProps = {
   onDateChange(date: Date | null): void;
   className?: string;
   inputClassName?: string;
+  showIcon?: boolean;
 };
 
 export default function CustomDatePicker({
   selectedDate,
   onDateChange,
   className = "",
-  inputClassName = ""
+  inputClassName = "",
+  showIcon = true
 }: DatePickerProps) {
   return (
     <div
-      className={`relative w-full focus-within:ring-2
-        focus-within:ring-blue-500
-        transition ${className}`}
+      className={`relative flex-1 focus-within:ring-2 focus-within:ring-blue-500 transition ${className}`}
     >
       <DatePicker
         selected={selectedDate}
         onChange={onDateChange}
         minDate={new Date()}
         placeholderText="Pick a Date"
-        className={`w-full h-11 rounded-md outline-none bg-transparent ${inputClassName}`}
+        dateFormat="MMM dd, yyyy"
+        className={`w-full rounded-md outline-none bg-transparent ${
+          showIcon ? "pr-10" : ""
+        } ${inputClassName}`}
       />
 
-      <Calendar1Icon
-        size={20}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
-      />
+      {showIcon && (
+        <Calendar1Icon
+          size={20}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+        />
+      )}
     </div>
   );
 }

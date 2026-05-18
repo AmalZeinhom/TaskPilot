@@ -1,6 +1,6 @@
 import React from "react";
 
-export function Dashboard() {
+export function Statistics() {
   return (
     <div className="py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">

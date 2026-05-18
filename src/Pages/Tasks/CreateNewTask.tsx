@@ -11,9 +11,9 @@ import { FaStarOfLife } from "react-icons/fa";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import useProjectName from "@/hooks/useProjectName";
+import useProjectName from "@/hooks/Projects/useProjectName";
 import { taskSchema } from "@/Schema/TaskSchema";
-import useFetchMembers from "@/hooks/useFetchMembers";
+import useFetchMembers from "@/hooks/Members/useFetchMembers";
 
 import { createTaskService } from "@/API/taskService";
 

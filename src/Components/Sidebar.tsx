@@ -1,16 +1,15 @@
 import {
   Folder,
   ListChecks,
-  User,
   Plus,
   CalendarCheck2,
   User2Icon,
   MessageCircleMore,
   LogOut
 } from "lucide-react";
-import { MdArrowForwardIos, MdOutlineArrowBackIosNew } from "react-icons/md";
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { MdArrowForwardIos, MdOutlineArrowBackIosNew, MdOutlineAnalytics } from "react-icons/md";
+import { useState, useRef, useEffect } from "react";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { showLogoutToast } from "@/Common/LogoutPopUp";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
@@ -88,11 +87,11 @@ export default function Sidebar({
           {
             name: "Tasks",
             icon: <CalendarCheck2 size={20} />,
-            path: `projects/${projectId}/tasks`
+            path: `/projects/${projectId}/tasks`
           }
         ]
       : []),
-    { name: "My Account", icon: <User size={20} />, path: "/my-account" }
+    { name: "My Statistics", icon: <MdOutlineAnalytics size={20} />, path: "/my-statistics" }
   ];
 
   const toggleSidebar = () => {
@@ -117,14 +116,16 @@ export default function Sidebar({
           {menuItems.map((item) => (
             <div key={item.name}>
               {item.path && !item.hasSubmenu ? (
-                <Link
+                <NavLink
                   to={item.path}
                   onClick={() => setIsMobileOpen?.(false)}
-                  className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-700 hover:text-white transition-colors"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 p-3 rounded-md transition-colors ${isActive ? "bg-blue-darkBlue text-white shadow-lg" : "hover:bg-blue-700 hover:text-white"}`
+                  }
                 >
                   {item.icon}
                   {!isCollapsed && <span>{item.name}</span>}
-                </Link>
+                </NavLink>
               ) : (
                 <div
                   className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-700 hover:text-white transition-colors cursor-pointer"
@@ -138,18 +139,20 @@ export default function Sidebar({
               {item.hasSubmenu && isProjectsOpen && !isCollapsed && (
                 <div className="ml-6 flex flex-col gap-1 mt-1">
                   {item.submenu.map((sub) => (
-                    <Link
+                    <NavLink
                       key={sub.name}
                       to={sub.path}
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsMobileOpen?.(false);
                       }}
-                      className="flex items-center gap-2 p-2 rounded-md hover:bg-blue-600 hover:text-white transition-colors"
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 p-3 rounded-md transition-colors ${isActive ? "bg-blue-500 text-white shadow-lg" : "hover:bg-blue-700 hover:text-white"}`
+                      }
                     >
                       {sub.icon}
                       <span>{sub.name}</span>
-                    </Link>
+                    </NavLink>
                   ))}
                 </div>
               )}

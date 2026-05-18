@@ -7,10 +7,10 @@ import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import CustomDatePicker from "@/Utils/DatePicker";
 import { FaStarOfLife } from "react-icons/fa";
-import useProjectName from "@/hooks/useProjectName";
+import useProjectName from "@/hooks/Projects/useProjectName";
 import Selector from "@/Utils/Selector";
 import { epicSchema } from "@/Schema/EpicSchema";
-import useFetchMembers from "@/hooks/useFetchMembers";
+import useFetchMembers from "@/hooks/Members/useFetchMembers";
 import { createEpicService } from "@/API/epicService";
 
 type FormData = z.infer<typeof epicSchema>;

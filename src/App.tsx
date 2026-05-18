@@ -3,7 +3,7 @@ import Home from "./Pages/Home.js";
 import { Toaster } from "react-hot-toast";
 import { SignUp } from "@/Pages/Auth/SignUp";
 import { LogIn } from "@/Pages/Auth/LogIn";
-import { Dashboard } from "./Pages/Dashboard.js";
+import { Statistics } from "./Pages/Statistics.js";
 import { ForgetPassword } from "./Pages/Auth/ForgetPassword";
 import { ResetPassword } from "@/Pages/Auth/ResetPassword";
 import Layout from "./Components/Layout.js";
@@ -22,8 +22,8 @@ const routes = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: "/dashboard",
-        element: <Dashboard />
+        path: "/my-statistics",
+        element: <Statistics />
       },
       {
         path: "/",

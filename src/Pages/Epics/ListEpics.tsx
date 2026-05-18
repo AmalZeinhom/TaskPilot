@@ -2,16 +2,16 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { HiOutlineLightBulb } from "react-icons/hi";
 import { CiCalendar, CiSearch } from "react-icons/ci";
-import { useEpics } from "@/hooks/useEpics";
+import { useEpics } from "@/hooks/Epics/useEpics";
 import { useState, useEffect } from "react";
 import EpicsModal from "@/Pages/Epics/EpicsModal";
-import useProjectName from "@/hooks/useProjectName";
+import useProjectName from "@/hooks/Projects/useProjectName";
 import Pagination from "@/Components/Pagination";
 import api from "@/API/axiosInstance";
 import { formatedDate } from "@/Utils/FormatedDate";
 import { getInitials } from "@/Utils/GetInitials";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
-import { useUpdateEpic } from "@/hooks/useUpdateEpics";
+import { useUpdateEpic } from "@/hooks/Epics/useUpdateEpics";
 import { Member } from "@/Types/Member";
 
 export default function ListEpics() {

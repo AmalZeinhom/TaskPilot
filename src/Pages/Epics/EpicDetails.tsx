@@ -12,7 +12,7 @@ import { getAvatarColor } from "@/Utils/GetAvatarColor";
 import { GiFullFolder } from "react-icons/gi";
 import { LuList } from "react-icons/lu";
 import { PlusIcon, PlusCircle } from "lucide-react";
-import useListTasks from "@/hooks/useListTasks";
+import useListTasks from "@/hooks/Tasks/useListTasks";
 import TaskDetailsModal from "../Tasks/TaskDetails";
 
 interface Member {
@@ -106,7 +106,7 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
         <div className="mb-5 text-lg md:text-xl font-bold text-gray-800">
           <EditableText
             value={epic.title}
-            onSave={(newTitle: string) => {
+            onSave={async (newTitle: string) => {
               onUpdate({ title: newTitle });
             }}
           />
@@ -116,7 +116,7 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
           <EditableText
             value={epic.description || ""}
             placeholder="Add description..."
-            onSave={(newDesc: string) => {
+            onSave={async (newDesc: string) => {
               onUpdate({ description: newDesc });
             }}
           />
@@ -166,7 +166,7 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                     deadline: date ? date.toISOString() : undefined
                   });
                 }}
-                className="bg-brightness-primary text-gray-600 border border-gray-200 rounded-md px-3"
+                className="bg-brightness-primary flex items-center h-11 text-gray-600 border border-gray-200 rounded-md px-3"
                 inputClassName="bg-blue-formBlue rounded-md"
               />
             </div>

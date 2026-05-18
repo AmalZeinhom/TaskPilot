@@ -8,7 +8,7 @@ import { getAvatarColor } from "@/Utils/GetAvatarColor";
 import Selector from "@/Utils/Selector";
 import { roleOptions } from "@/Constants/roleOptions";
 import InviteMembersModal from "./InviteMembersModal";
-import { useProjectMembers } from "@/hooks/useProjectMembers";
+import { useProjectMembers } from "@/hooks/Members/useProjectMembers";
 
 export default function ProjectMembers() {
   const [isInviteOpen, setInviteOpen] = useState(false);

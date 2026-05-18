@@ -3,8 +3,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ClipboardPenLine, X, PencilLine } from "lucide-react";
 import { Project } from "@/Types/Project";
 import Pagination from "@/Components/Pagination";
-import { useProjects } from "@/hooks/useProjects";
-import { useDeleteProject } from "@/hooks/useDeleteProject";
+import { useProjects } from "@/hooks/Projects/useProjects";
+import { useDeleteProject } from "@/hooks/Projects/useDeleteProject";
 
 export default function ProjectsList() {
   const [searchParams, setSearchParams] = useSearchParams();

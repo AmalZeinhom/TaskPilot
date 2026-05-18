@@ -4,13 +4,15 @@ export type Task = {
   title: string;
   description: string;
   due_date: string;
+  created_at: string;
+  status: string;
+  project_id: string;
+
   created_by: {
     id: string;
     name: string;
   };
-  created_at: string;
-  status: string;
-  project_id: string;
+
   assignee: {
     id: string;
     name: string;
@@ -18,6 +20,7 @@ export type Task = {
     department: string;
     avatar?: string | null;
   } | null;
+
   epic: {
     id: string;
     epic_id: string;
