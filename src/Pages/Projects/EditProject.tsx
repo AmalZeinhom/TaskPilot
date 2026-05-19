@@ -3,13 +3,19 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../../API/axiosInstance";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useProjectName from "@/hooks/Projects/useProjectName";
+import { CheckCircle } from "lucide-react";
+import { FaStarOfLife } from "react-icons/fa";
 
 export default function EditProject() {
+  const { projectId } = useParams<{ projectId: string }>();
+  const projectName = useProjectName(projectId);
+
   const navigate = useNavigate();
-  const { projectId } = useParams();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchProjectData() {
@@ -50,61 +56,99 @@ export default function EditProject() {
     }
   }
   return (
-    <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="px-2 py-6 md:py-12 md:px-6 lg:px-8 lg:py-4">
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2 mx-auto mb-2 text-sm">
+          <Link to={"/projects"} className="cursor-pointer text-gray-500 hover:text-gray-700">
+            Projects /
+          </Link>
+          <Link
+            to={`/projects/${projectId}`}
+            className="cursor-pointer text-gray-500 hover:text-gray-700"
+          >
+            {projectName || ""} /
+          </Link>
+          <span className="cursor-pointer text-blue-800">Edit Project</span>
+        </div>
+
+        <h1 className="font-bold text-xl md:text-3xl text-gray-800">Edit Project</h1>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-7xl bg-brightness-light rounded-2xl p-8 sm:p-8 md:p-10"
+        className="w-full bg-brightness-light rounded-md px-3 py-5 md:px-8 md:py-10"
       >
-        <div className="flex flex-wrap gap-2 mx-auto mb-6 text-sm">
-          <Link to={"/projects"} className="cursor-pointer text-gray-500 hover:text-gray-700">
-            Projects /
-          </Link>
-          <span className="cursor-pointer text-gray-500 hover:text-gray-700">Edit Project</span>
-        </div>
-
         <form
-          className="w-full bg-brightness-primary py-10 px-5 sm:py-8 sm:px-6 rounded-2xl shadow-2xl"
+          className="w-full bg-brightness-primary py-6 px-4 md:py-8 md:px-6 rounded-md shadow-2xl"
           noValidate
           onSubmit={updateProjectData}
         >
-          <h2 className="text-xl sm:text-2xl font-semibold text-blue-darkBlue mb-6 text-center">
-            Edit Project
-          </h2>
+          <span className="flex items-center gap-2 mb-6">
+            <CheckCircle size={40} className="text-blue-800 bg-blue-50 p-2 hidden md:block" />
+            <span className="flex flex-wrap max-w-md">
+              <h2 className="text-xl md:text-2xl font-semibold text-blue-darkBlue">Edit Project</h2>
+              <p className="text-gray-500 text-xs md:text-sm">
+                Define the scope and foundational details for your project
+              </p>
+            </span>
+          </span>
 
-          <label htmlFor="project-title"> Project Title</label>
-          <input
-            type="text"
-            id="project-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full min-h-11 border-2 border-gray-400 rounded-xl focus:shadow-xl focus:border-gray-500 outline-none px-3 py-2 mt-2 mb-5"
-          />
+          <div className="space-y-2 mb-5">
+            <span className="flex items-center gap-1">
+              <label className="text-sm" htmlFor="project-title">
+                TITLE
+              </label>
+              <FaStarOfLife className="text-red-400" size={10} />
+            </span>
+            <input
+              type="text"
+              id="project-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full bg-blue-formBlue rounded-md px-3 py-2 mt-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+              placeholder="E.g. Design System Documentation"
+            />
+          </div>
 
-          <label htmlFor="project-description"> Project Description</label>
-          <textarea
-            id="project-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full min-h-28 sm:min-h-32 border-2 border-gray-400 rounded-xl focus:shadow-xl focus:border-gray-500 outline-none px-3 py-2 mt-2 mb-5"
-          />
-          <div className="flex gap-5">
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm">
+              DESCRIPTION
+              <p className="text-xs font-light text-gray-400 mb-1">Optional</p>
+            </label>
+            <span>
+              <textarea
+                id="description"
+                rows={7}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Provide a high level overview of the project's architectural objectives and key milestones..."
+                className="w-full bg-blue-formBlue rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+              />
+              <p className="text-xs font-light flex justify-end text-gray-400">0/500 Characters</p>
+            </span>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-end gap-4 mt-6">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="bg-blue-darkBlue text-white w-full sm:w-auto font-semibold px-6 py-2 rounded-xl shadow-2xl hover:bg-cyan-800 transition-colors duration-300"
+              disabled={isSubmitting}
+              className={`w-full sm:w-auto bg-blue-darkBlue text-white font-semibold px-6 py-2 rounded-md shadow-2xl transition-colors duration-300 ${
+                isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-cyan-800"
+              }`}
             >
-              Save
+              {isSubmitting ? "Creating..." : "Create Project"}
             </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               type="button"
-              onClick={() => navigate("/projects")}
-              className="bg-blue-lightBlue text-white w-full sm:w-auto font-semibold px-6 py-2 rounded-xl shadow-2xl hover:bg-cyan-800 transition-colors duration-300"
+              onClick={() => navigate(`/projects`)}
+              className="w-full sm:w-auto px-6 py-1 rounded-md bg-gray-200"
             >
               Cancel
             </motion.button>
