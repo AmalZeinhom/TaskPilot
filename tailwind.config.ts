@@ -11,7 +11,8 @@ export default {
         },
         darkness: {
           dark: "#2c3e50",
-          iconList: "#5D7285"
+          iconList: "#5D7285",
+          textBlack: "#0F172A"
         },
         blue: {
           darkBlue: "#0A3B83",

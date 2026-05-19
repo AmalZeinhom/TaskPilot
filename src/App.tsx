@@ -3,7 +3,7 @@ import Home from "./Pages/Home.js";
 import { Toaster } from "react-hot-toast";
 import { SignUp } from "@/Pages/Auth/SignUp";
 import { LogIn } from "@/Pages/Auth/LogIn";
-import { Statistics } from "./Pages/Statistics.js";
+import { Statistics } from "./Pages/Statistics/Statistics.js";
 import { ForgetPassword } from "./Pages/Auth/ForgetPassword";
 import { ResetPassword } from "@/Pages/Auth/ResetPassword";
 import Layout from "./Components/Layout.js";

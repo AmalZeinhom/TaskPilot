@@ -19,7 +19,7 @@ export default function CustomDatePicker({
 }: DatePickerProps) {
   return (
     <div
-      className={`relative flex-1 focus-within:ring-2 focus-within:ring-blue-500 transition ${className}`}
+      className={`relative flex-1 flex items-center focus-within:ring-2 focus-within:ring-blue-500 transition ${className}`}
     >
       <DatePicker
         selected={selectedDate}
