@@ -19,11 +19,11 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type = "text", field, 
           placeholder={label}
           type={type}
           {...field}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 sm:px-4 sm:py-2 pr-10 text-sm sm:text-base"
+          className="w-full bg-blue-formBlue rounded-md px-3 py-2 sm:px-4 sm:py-2 pr-10 text-sm sm:text-base"
         />
 
         {icon && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer">
+          <div className="absolute right-3 top-1/2 -translate-y-1/3 md:top-1 md:translate-y-1 text-gray-400 cursor-pointer">
             {icon}
           </div>
         )}

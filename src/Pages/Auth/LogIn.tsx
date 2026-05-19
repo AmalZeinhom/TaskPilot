@@ -100,40 +100,54 @@ export function LogIn() {
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-            <Controller
-              name="email"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
+            <div>
+              <p className="text-gray-700 uppercase text-xs md:text-lg mb-1 font-semibold">Email</p>
+              <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <div>
+                    <FormInput
+                      label="yourname@company.com"
+                      id="email"
+                      type="email"
+                      field={field}
+                      error={fieldState.error}
+                    />
+                  </div>
+                )}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <span className="flex justify-between items-center">
+                <p className="text-gray-700 uppercase text-xs md:text-lg font-semibold">Password</p>
+                <NavLink
+                  to="/forget-password"
+                  className="text-sm text-gray-500 hover:text-gray-800 md:hidden block"
+                >
+                  Forgot?
+                </NavLink>
+              </span>
+              <Controller
+                name="password"
+                control={control}
+                render={({ field, fieldState }) => (
                   <FormInput
-                    label="Email"
-                    id="email"
-                    type="email"
+                    label="Enter Your Password"
+                    id="password"
+                    type={showPassword ? "text" : "password"}
                     field={field}
                     error={fieldState.error}
+                    icon={
+                      <button type="button" onClick={() => setShowPassword((prev) => !prev)}>
+                        {showPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
+                      </button>
+                    }
                   />
-                </div>
-              )}
-            />
-
-            <Controller
-              name="password"
-              control={control}
-              render={({ field, fieldState }) => (
-                <FormInput
-                  label="Password"
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  field={field}
-                  error={fieldState.error}
-                  icon={
-                    <button type="button" onClick={() => setShowPassword((prev) => !prev)}>
-                      {showPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
-                    </button>
-                  }
-                />
-              )}
-            />
+                )}
+              />
+            </div>
 
             <div className="flex justify-between space-x-2">
               <Controller
@@ -157,7 +171,10 @@ export function LogIn() {
                 )}
               />
 
-              <NavLink to="/forget-password" className="text-sm text-gray-500 hover:text-gray-800">
+              <NavLink
+                to="/forget-password"
+                className="text-sm text-gray-500 hover:text-gray-800 md:block hidden"
+              >
                 Forgot password?
               </NavLink>
             </div>
