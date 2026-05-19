@@ -235,7 +235,7 @@ export function SignUp() {
 
             <p className="text-sm text-gray-600 text-center">
               Already have an account?
-              <NavLink to="/login" className="underline underline-offset-2 ms-2">
+              <NavLink to="/login" className="text-blue-800 ms-2">
                 Login
               </NavLink>
             </p>

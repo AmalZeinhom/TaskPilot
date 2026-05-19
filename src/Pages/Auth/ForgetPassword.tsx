@@ -89,12 +89,12 @@ export function ForgetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-50 via-blue-100 to-cyan-50 p-6">
+    <div className="min-h-screen flex justify-center items-center bg-brightness-primary md:p-10 p-6 w-full">
       <motion.div
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
-        className="rounded-3xl shadow-2xl flex flex-col md:flex-row items-center justify-center max-w-4xl p-8 md:p-12 space-y-8 md:space-y-0 md:space-x-10 bg-gradient-to-br from-slate-400 via-blue-50 to-white"
+        className="rounded-md shadow-2xl flex flex-col md:flex-row items-center justify-center p-8 md:p-12 space-y-8 md:space-y-0 md:space-x-10 bg-brightness-secondary w-full max-w-4xl"
       >
         <motion.div
           initial={{ scale: 1 }}
@@ -109,11 +109,11 @@ export function ForgetPassword() {
           />
         </motion.div>
 
-        <div className="w-full md:w-1/2 ">
-          <h1 className="text-3xl font-semibold text-blue-950 mb-6 text-center md:text-left">
+        <div>
+          <h1 className="md:text-3xl text-lg text-start font-semibold text-blue-950 mb-2">
             Forgot Your Password?
           </h1>
-          <p className="text-gray-500 text-sm mb-5 text-center md:text-left">
+          <p className="text-gray-500 md:text-sm text-xs mb-5 text-start">
             Enter your email address below, and we’ll send you a link to reset your password.
           </p>
 
@@ -133,11 +133,11 @@ export function ForgetPassword() {
               )}
             />
 
-            <div className="buttons flex justify-center gap-3 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-3">
               <button
                 type="submit"
                 disabled={loading || disabled}
-                className={`w-1/2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 rounded-xl font-medium transition-all ${
+                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 rounded-xl font-medium transition-all ${
                   loading || disabled
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:shadow-lg hover:scale-[1.02]"
@@ -149,7 +149,7 @@ export function ForgetPassword() {
               <button
                 onClick={() => navigate("/login")}
                 type="button"
-                className="w-1/2 border border-gray-300 text-gray-600 py-2 rounded-xl hover:bg-gray-100 transition-all font-medium"
+                className="border border-gray-300 text-gray-600 py-2 rounded-xl hover:bg-gray-100 transition-all font-medium"
               >
                 Back to Sign In
               </button>
@@ -164,12 +164,11 @@ export function ForgetPassword() {
               >
                 {disabled ? (
                   <>
-                    <FaStopwatch className="inline mr-1" /> Resend Email Will be available in{" "}
+                    <FaStopwatch className="inline mr-1" /> Resend Email Will be available in
                     {formatTime(countDown)}
                   </>
                 ) : (
                   <>
-                    {" "}
                     <FaEnvelope className="inline mr-1" /> Don’t receive an email? Resend
                   </>
                 )}

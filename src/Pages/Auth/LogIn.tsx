@@ -188,8 +188,8 @@ export function LogIn() {
 
             <p className="text-sm text-gray-600 text-center">
               Don’t have an account?
-              <NavLink to="/signup" className="underline underline-offset-2 ms-2">
-                Sign up for free
+              <NavLink to="/signup" className="text-blue-800 ms-2">
+                Sign up
               </NavLink>
             </p>
           </form>
