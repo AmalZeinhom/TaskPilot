@@ -101,7 +101,7 @@ export function LogIn() {
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <div>
-              <p className="text-gray-700 uppercase text-xs md:text-lg mb-1 font-semibold">Email</p>
+              <p className="text-gray-700 uppercase text-xs mb-1 font-semibold">Email</p>
               <Controller
                 name="email"
                 control={control}
@@ -121,7 +121,7 @@ export function LogIn() {
 
             <div className="space-y-1">
               <span className="flex justify-between items-center">
-                <p className="text-gray-700 uppercase text-xs md:text-lg font-semibold">Password</p>
+                <p className="text-gray-700 uppercase text-xs font-semibold">Password</p>
                 <NavLink
                   to="/forget-password"
                   className="text-sm text-gray-500 hover:text-gray-800 md:hidden block"

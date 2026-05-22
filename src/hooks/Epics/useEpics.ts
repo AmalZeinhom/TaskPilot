@@ -72,6 +72,7 @@ export function useEpics(projectId?: string, limit = 9, page = 1, searchTerm = "
     totalPages: Math.ceil(total / limit),
     page,
     error,
-    setData
+    setData,
+    fetchEpics
   };
 }

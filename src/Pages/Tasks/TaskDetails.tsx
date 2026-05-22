@@ -3,7 +3,7 @@ import { LuLayers } from "react-icons/lu";
 import { motion } from "framer-motion";
 import { BsLink } from "react-icons/bs";
 import Selector from "@/Utils/Selector";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { statusOptions, TaskStatusType } from "@/Constants/taskStatus";
 import { statusSelectColors } from "@/Constants/statusColors";
 import { getInitials } from "@/Utils/GetInitials";
@@ -16,13 +16,10 @@ import toast from "react-hot-toast";
 import api from "@/API/axiosInstance";
 import { Task } from "@/Types/Tasks";
 import CustomDatePicker from "@/Utils/DatePicker";
-
-type TaskDetailsProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  taskId?: string;
-  projectId?: string;
-};
+import { TaskDetailsProps } from "@/Types/TaskDetails";
+import { Member } from "@/Types/Member";
+import { Epic } from "@/Types/Epic";
+import { AssigneeOption } from "@/Types/Assignee";
 
 export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }: TaskDetailsProps) {
   const {
@@ -35,14 +32,18 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
     enabled: isOpen
   });
 
-  //why editable text? there is 2 sources if truth, 1. task from API, 2. editableText user edits(optimistic updates)
-  const [editableTask, setEditableTask] = useState(task ?? null); //task ?? null this is a Nullish Coalescing Operator which means if task exists use it, if it null or undefiend use null
-  //per-field loading
+  const [editableTask, setEditableTask] = useState<Task | null>(null);
+
+  const [members, setMembers] = useState<Member[]>([]);
+  const [epics, setEpics] = useState<Epic[]>([]);
+
   const [fieldLoading, setFieldLoading] = useState({
     title: false,
     description: false,
     status: false,
-    due_date: false
+    due_date: false,
+    assignee: false,
+    epic: false
   });
 
   useEffect(() => {
@@ -51,36 +52,275 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
     }
   }, [task]);
 
-  const updateTaskField = async (field: keyof Task, value: any) => {
+  const setLoadingField = (field: keyof typeof fieldLoading, value: boolean) => {
+    setFieldLoading((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const updateTaskField = async (
+    field: keyof Task,
+    value: any,
+    loadingField?: keyof typeof fieldLoading
+  ) => {
     if (!editableTask) return;
 
-    //Save the old value before changing, this is called snapshot for rollback. incase there is any error occured
     const previousValue = editableTask[field];
 
-    if (previousValue === value) return;
+    const isSame = JSON.stringify(previousValue) === JSON.stringify(value);
 
-    setEditableTask((prev) => (prev ? { ...prev, [field]: value } : prev));
+    if (isSame) return;
 
-    setFieldLoading((prev) => ({ ...prev, [field]: true }));
+    if (field === "title" && (!value || value.trim() === "")) {
+      toast.error("Title is required");
+      return;
+    }
+
+    setEditableTask((prev) =>
+      prev
+        ? {
+            ...prev,
+            [field]: value
+          }
+        : prev
+    );
+
+    if (loadingField) {
+      setLoadingField(loadingField, true);
+    }
 
     try {
-      const res = await api.patch(`/rest/v1/tasks?id=eq.${editableTask.id}`, { [field]: value });
+      await api.patch(`/rest/v1/tasks?id=eq.${editableTask.id}`, {
+        [field]: value
+      });
 
-      console.log(res.data);
-
-      toast.success(`Field updated`);
+      toast.success("Field updated");
     } catch (err) {
       console.log(err);
-      // rollback
-      setEditableTask((prev) => (prev ? { ...prev, [field]: previousValue } : prev));
+
+      setEditableTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              [field]: previousValue
+            }
+          : prev
+      );
+
+      toast.error("Failed to update task. Please try again.");
     } finally {
-      setFieldLoading((prev) => ({ ...prev, [field]: false }));
+      if (loadingField) {
+        setLoadingField(loadingField, false);
+      }
     }
   };
+
+  const fetchMembers = async () => {
+    if (!projectId) return;
+
+    try {
+      const res = await api.get("/rest/v1/get_project_members", {
+        params: {
+          project_id: `eq.${projectId}`,
+          select: `
+            user_id,
+            metadata
+          `
+        }
+      });
+
+      setMembers(res.data || []);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to load members");
+    }
+  };
+
+  const fetchEpics = async () => {
+    if (!projectId) return;
+
+    try {
+      const res = await api.get("/rest/v1/epics", {
+        params: {
+          project_id: `eq.${projectId}`,
+          select: "id,epic_id,title"
+        }
+      });
+
+      setEpics(res.data || []);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to load epics");
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && projectId) {
+      fetchMembers();
+      fetchEpics();
+    }
+  }, [isOpen, projectId]);
+
+  const assigneeOptions: AssigneeOption[] = useMemo(() => {
+    return [
+      {
+        label: "Unassigned",
+        value: null
+      },
+      ...members.map((member) => ({
+        label: member.metadata?.name || "Unknown User",
+        value: member.user_id
+      }))
+    ];
+  }, [members]);
+
+  const selectedAssignee = assigneeOptions.find(
+    (option) => option.value === editableTask?.assignee?.id
+  );
+
+  const epicOptions = [
+    {
+      label: "No Epic",
+      value: null
+    },
+    ...epics.map((epic) => ({
+      label: epic.epic_id,
+      value: epic.id
+    }))
+  ];
+
+  const selectedEpic = epicOptions.find((option) => option.value === editableTask?.epic?.id);
 
   const selectedStatusColor = editableTask?.status
     ? statusSelectColors[editableTask.status]
     : undefined;
+
+  const updateAssignee = async (selectedValue: string | null) => {
+    if (!editableTask) return;
+
+    const previousAssignee = editableTask.assignee;
+
+    const selectedMember = members.find((member) => member.user_id === selectedValue);
+
+    const newAssignee = selectedMember
+      ? {
+          id: selectedMember.user_id,
+          name: selectedMember.metadata?.name || "Unknown",
+          email: selectedMember.metadata?.email || "",
+          department: selectedMember.metadata?.department || null,
+          avatar: selectedMember.metadata?.avatar || null
+        }
+      : null;
+
+    if (previousAssignee?.id === newAssignee?.id) return;
+
+    setEditableTask((prev) =>
+      prev
+        ? {
+            ...prev,
+            assignee: newAssignee
+          }
+        : prev
+    );
+
+    setLoadingField("assignee", true);
+
+    try {
+      await api.patch(`/rest/v1/tasks?id=eq.${editableTask.id}`, {
+        assignee_id: selectedValue
+      });
+
+      toast.success("Assignee updated");
+    } catch (err) {
+      console.log(err);
+
+      setEditableTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              assignee: previousAssignee
+            }
+          : prev
+      );
+
+      toast.error("Failed to update task. Please try again.");
+    } finally {
+      setLoadingField("assignee", false);
+    }
+  };
+
+  const updateEpic = async (epicId: string | null) => {
+    if (!editableTask) return;
+
+    const previousEpic = editableTask.epic;
+
+    const selectedEpicData = epics.find((epic) => epic.id === epicId);
+
+    const newEpic = selectedEpicData
+      ? {
+          id: selectedEpicData.id,
+          epic_id: selectedEpicData.epic_id,
+          title: selectedEpicData.title
+        }
+      : null;
+
+    if (previousEpic?.id === newEpic?.id) return;
+
+    setEditableTask((prev) =>
+      prev
+        ? {
+            ...prev,
+            epic: newEpic,
+            epic_id: epicId
+          }
+        : prev
+    );
+
+    setLoadingField("epic", true);
+
+    try {
+      await api.patch(`/rest/v1/tasks?id=eq.${editableTask.id}`, {
+        epic_id: epicId
+      });
+
+      toast.success("Epic updated");
+    } catch (err) {
+      console.log(err);
+
+      setEditableTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              epic: previousEpic,
+              epic_id: previousEpic?.id || null
+            }
+          : prev
+      );
+
+      toast.error("Failed to update task. Please try again.");
+    } finally {
+      setLoadingField("epic", false);
+    }
+  };
+
+  useEffect(() => {
+    if (!editableTask?.epic?.id) return;
+
+    const epicStillExists = epics.some((epic) => epic.id === editableTask.epic?.id);
+
+    if (!epicStillExists && epics.length > 0) {
+      setEditableTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              epic: null,
+              epic_id: null
+            }
+          : prev
+      );
+    }
+  }, [epics, editableTask]);
 
   if (!isOpen) return null;
 
@@ -90,7 +330,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="bg-gray-50 w-full h-[80vh] md:w-[850px] md:h-[80vh] flex flex-col md:flex-row overflow-vi rounded-t-3xl md:rounded-2xl mt-10 shadow-2xl"
+        className="bg-gray-50 w-full h-[80vh] md:w-[850px] md:h-[80vh] flex flex-col md:flex-row overflow-hidden rounded-t-3xl md:rounded-2xl mt-10 shadow-2xl"
       >
         {/* LEFT CONTENT */}
         <div className="flex flex-col flex-1 md:flex-[3] justify-between overflow-y-auto border-gray-200 md:border-r">
@@ -106,19 +346,6 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                 <div className="space-y-2">
                   <div className="h-8 w-[80%] rounded bg-gray-200" />
                   <div className="h-8 w-[60%] rounded bg-gray-200" />
-                </div>
-
-                <div className="h-[1px] w-full bg-gray-200" />
-
-                <div className="space-y-3">
-                  <div className="h-4 w-28 rounded bg-gray-200" />
-
-                  <div className="space-y-2">
-                    <div className="h-3 w-full rounded bg-gray-200" />
-                    <div className="h-3 w-full rounded bg-gray-200" />
-                    <div className="h-3 w-[90%] rounded bg-gray-200" />
-                    <div className="h-3 w-[70%] rounded bg-gray-200" />
-                  </div>
                 </div>
               </div>
             )}
@@ -169,7 +396,9 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                     <span className="hidden md:flex items-center gap-1">
                       <LuLayers size={14} className="text-gray-500" />
 
-                      <p className="text-xs text-gray-600">{editableTask?.epic?.epic_id}</p>
+                      <p className="text-xs text-gray-600">
+                        {editableTask?.epic?.epic_id || "No Epic"}
+                      </p>
                     </span>
                   </div>
 
@@ -184,7 +413,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                   value={editableTask?.title || ""}
                   loading={fieldLoading.title}
                   required
-                  onSave={(value) => updateTaskField("title", value)}
+                  onSave={(value) => updateTaskField("title", value.trim(), "title")}
                   className="text-2xl md:text-3xl font-bold text-[#0B1B46] leading-tight"
                 />
 
@@ -197,8 +426,11 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                     }}
                   >
                     <select
+                      disabled={fieldLoading.status}
                       value={editableTask?.status || ""}
-                      onChange={(e) => updateTaskField("status", e.target.value as TaskStatusType)}
+                      onChange={(e) =>
+                        updateTaskField("status", e.target.value as TaskStatusType, "status")
+                      }
                       className="bg-transparent px-3 py-1.5 text-[10px] font-semibold outline-none border-none appearance-none cursor-pointer"
                       style={{
                         color: selectedStatusColor?.text
@@ -212,27 +444,11 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                     </select>
                   </div>
 
-                  {/* <div>
-                    <p className="text-xs text-gray-500 font-semibold mb-3">STATUS</p>
-
-                    <Selector
-                      options={statusOptions()}
-                      value={statusOptions().find((o) => o.value === editableTask?.status)}
-                      onChange={(option) => {
-                        const newStatus = option?.value as TaskStatusType;
-
-                        updateTaskField("status", newStatus);
-                      }}
-                      controlBg={selectedStatusColor?.bg}
-                      controlText={selectedStatusColor?.text}
-                    />
-                  </div> */}
-
                   <div className="flex items-center gap-1 bg-blue-100 rounded-full px-3 py-1.5">
                     <LuLayers size={11} className="text-blue-700" />
 
                     <p className="text-[10px] font-semibold text-blue-700">
-                      {editableTask?.epic?.epic_id}
+                      {editableTask?.epic?.epic_id || "NO EPIC"}
                     </p>
                   </div>
                 </div>
@@ -245,38 +461,29 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                   <div className="bg-white rounded-xl p-3">
                     <p className="text-xs text-gray-400 mb-2 font-bold">ASSIGNEE</p>
 
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-semibold ${getAvatarColor(
-                          editableTask?.assignee?.name
-                        )}`}
-                      >
-                        {getInitials(editableTask?.assignee?.name || "UN")}
-                      </div>
-
-                      <p className="text-xs font-semibold text-gray-700">
-                        {editableTask?.assignee?.name || "Unassigned"}
-                      </p>
-                    </div>
+                    <Selector
+                      options={assigneeOptions}
+                      value={selectedAssignee}
+                      isDisabled={fieldLoading.assignee}
+                      onChange={(option) => updateAssignee(option?.value || null)}
+                    />
                   </div>
 
                   {/* DUE DATE */}
                   <div className="bg-white rounded-xl p-3">
                     <p className="text-xs text-gray-400 mb-2 font-bold">DUE DATE</p>
 
-                    {/* <span className="flex items-center gap-1">
-                      <Calendar size={12} className="text-gray-700" />
-
-                      <p className="text-xs font-semibold text-gray-700">
-                        {formatedDate(editableTask?.due_date)}
-                      </p>
-                    </span> */}
                     <CustomDatePicker
                       selectedDate={
                         editableTask?.due_date ? new Date(editableTask?.due_date) : null
                       }
                       onDateChange={(date) => {
-                        updateTaskField("due_date", date ? date.toISOString() : null);
+                        if (date && date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                          toast.error("Past dates are not allowed");
+                          return;
+                        }
+
+                        updateTaskField("due_date", date ? date.toISOString() : null, "due_date");
                       }}
                       className="w-fit"
                       inputClassName="text-right text-sm font-semibold text-gray-700 border-none bg-transparent cursor-pointer"
@@ -322,10 +529,14 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                   <p className="text-xs font-semibold text-gray-500 mb-3">DESCRIPTION</p>
 
                   <EditableText
-                    value={editableTask?.description || ""}
+                    value={editableTask?.description || "No description provided"}
                     loading={fieldLoading.description}
                     onSave={(value) =>
-                      updateTaskField("description", value.trim() === "" ? null : value)
+                      updateTaskField(
+                        "description",
+                        value.trim() === "" ? null : value,
+                        "description"
+                      )
                     }
                     className="text-sm text-gray-700 leading-tight"
                   />
@@ -364,11 +575,12 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
 
               <Selector
                 options={statusOptions()}
+                isDisabled={fieldLoading.status}
                 value={statusOptions().find((o) => o.value === editableTask?.status)}
                 onChange={(option) => {
                   const newStatus = option?.value as TaskStatusType;
 
-                  updateTaskField("status", newStatus);
+                  updateTaskField("status", newStatus, "status");
                 }}
                 controlBg={selectedStatusColor?.bg}
                 controlText={selectedStatusColor?.text}
@@ -379,23 +591,24 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
             <div>
               <p className="text-xs text-gray-500 font-semibold mb-3">ASSIGNEE</p>
 
-              <div className="border border-gray-200 px-3 py-3 flex items-center gap-3 bg-white rounded-xl">
-                <span
-                  className={`rounded-full ${getAvatarColor(
-                    task.assignee?.name
-                  )} text-white w-7 h-7 flex items-center justify-center text-xs font-semibold`}
-                >
-                  {getInitials(task.assignee?.name || "UN")}
-                </span>
+              <Selector
+                options={assigneeOptions}
+                value={selectedAssignee}
+                isDisabled={fieldLoading.assignee}
+                onChange={(option) => updateAssignee(option?.value || null)}
+              />
+            </div>
 
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">
-                    {task.assignee?.name || "Unassigned"}
-                  </p>
+            {/* EPIC */}
+            <div>
+              <p className="text-xs text-gray-500 font-semibold mb-3">EPIC</p>
 
-                  <p className="text-xs text-gray-500">{task.assignee?.department || "Member"}</p>
-                </div>
-              </div>
+              <Selector
+                options={epicOptions}
+                value={selectedEpic}
+                isDisabled={fieldLoading.epic}
+                onChange={(option) => updateEpic(option?.value || null)}
+              />
             </div>
 
             {/* Reporter */}
@@ -404,7 +617,9 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
 
               <div className="flex items-center gap-3">
                 <span
-                  className={`rounded-full ${getAvatarColor(editableTask?.created_by?.name)} text-white w-7 h-7 flex items-center justify-center text-xs font-semibold`}
+                  className={`rounded-full ${getAvatarColor(
+                    editableTask?.created_by?.name
+                  )} text-white w-7 h-7 flex items-center justify-center text-xs font-semibold`}
                 >
                   {getInitials(editableTask?.created_by?.name || "")}
                 </span>
@@ -428,7 +643,12 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId, projectId }:
                   <CustomDatePicker
                     selectedDate={editableTask?.due_date ? new Date(editableTask?.due_date) : null}
                     onDateChange={(date) => {
-                      updateTaskField("due_date", date ? date.toISOString() : null);
+                      if (date && date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                        toast.error("Past dates are not allowed");
+                        return;
+                      }
+
+                      updateTaskField("due_date", date ? date.toISOString() : null, "due_date");
                     }}
                     className="w-fit"
                     inputClassName="text-right text-sm font-semibold text-gray-700 border-none bg-transparent"

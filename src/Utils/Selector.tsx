@@ -13,6 +13,7 @@ type AppSelectProps = {
   className?: string; // Affect the wrapper arround the selector component.
   controlBg?: string; // Affect the selector control bacground itself.
   controlText?: string;
+  isDisabled?: boolean;
 };
 
 const getCustomStyles = (controlBg?: string, controlText?: string) => ({

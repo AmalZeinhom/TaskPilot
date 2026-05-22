@@ -15,7 +15,7 @@ import useProjectName from "@/hooks/Projects/useProjectName";
 import { taskSchema } from "@/Schema/TaskSchema";
 import useFetchMembers from "@/hooks/Members/useFetchMembers";
 
-import { createTaskService } from "@/API/taskService";
+import { createTaskService } from "@/API/tasks/taskService";
 
 type FormData = z.infer<typeof taskSchema>;
 

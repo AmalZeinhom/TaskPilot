@@ -17,12 +17,13 @@ export type Task = {
     id: string;
     name: string;
     email: string;
-    department: string;
+    department: string | null;
     avatar?: string | null;
   } | null;
 
   epic: {
     id: string;
-    epic_id: string;
-  };
+    epic_id: string | null;
+    title?: string;
+  } | null;
 };

@@ -1,30 +1,3 @@
-// import api from "@/API/axiosInstance";
-// import { useState } from "react";
-// import toast from "react-hot-toast";
-
-// export function useUpdateEpic() {
-//   const [loading, setLoading] = useState(false);
-
-//   const updateEpic = async (id: string, payload: any) => {
-//     try {
-//       setLoading(true);
-
-//       await api.patch(`/rest/v1/epics?id=eq.${id}`, payload, {});
-
-//       toast.success("Epic Updated Successfully");
-//       return true;
-//     } catch {
-//       toast.error("Failed to Update Epic");
-//       return false;
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return { updateEpic, loading };
-// }
-// useUpdateEpic.ts
-
 import api from "@/API/axiosInstance";
 import { Epic } from "@/Types/Epic";
 import { Member } from "@/Types/Member";
@@ -45,8 +18,8 @@ export function useUpdateEpic(
         localFields.assignee = selectedMember
           ? {
               sub: selectedMember.user_id,
-              name: selectedMember.metadata.name,
-              email: selectedMember.metadata.email,
+              name: selectedMember?.metadata?.name || "",
+              email: selectedMember?.metadata?.email || "",
               department: ""
             }
           : null;

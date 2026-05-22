@@ -137,7 +137,7 @@ export function ForgetPassword() {
               <button
                 type="submit"
                 disabled={loading || disabled}
-                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 rounded-xl font-medium transition-all ${
+                className={`obg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 rounded-xl font-medium transition-all ${
                   loading || disabled
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:shadow-lg hover:scale-[1.02]"
@@ -149,7 +149,7 @@ export function ForgetPassword() {
               <button
                 onClick={() => navigate("/login")}
                 type="button"
-                className="border border-gray-300 text-gray-600 py-2 rounded-xl hover:bg-gray-100 transition-all font-medium"
+                className="oborder border-gray-300 text-gray-600 py-2 rounded-xl hover:bg-gray-100 transition-all font-medium"
               >
                 Back to Sign In
               </button>
