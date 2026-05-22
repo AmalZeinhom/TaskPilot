@@ -89,7 +89,10 @@ export default function ListEpics() {
             <Link to="/projects" className="text-gray-500 hover:text-gray-700">
               Projects /
             </Link>
-            <Link to={`/projects/${projectId}`} className="text-gray-500 hover:text-gray-700">
+            <Link
+              to={`/projects/${projectId}/edit-project`}
+              className="text-gray-500 hover:text-gray-700"
+            >
               {projectName || projectId} /
             </Link>
             <span className="text-gray-700 font-medium">Epics</span>

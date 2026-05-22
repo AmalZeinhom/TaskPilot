@@ -26,7 +26,12 @@ export default function BoardView() {
   const [activeTask, setActiveTask] = useState<any>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const view = searchParams.get("view") || "board";
+
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  const viewFromUrl = searchParams.get("view") || "board";
+
+  // 🚀 override على الموبايل
+  const view = isMobile ? "list" : viewFromUrl;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
@@ -112,7 +117,7 @@ export default function BoardView() {
           <Link to="/projects" className="text-gray-500">
             Projects /
           </Link>
-          <Link to={`/projects/${projectId}`} className="text-gray-500">
+          <Link to={`/projects/${projectId}/edit-project`} className="text-gray-500">
             {projectName || projectId} /
           </Link>
           <span className="text-gray-700 font-medium">Tasks</span>
@@ -134,7 +139,7 @@ export default function BoardView() {
               />
             </div>
 
-            <div className="w-full md:w-80">
+            <div className="w-full md:w-80 hidden md:block">
               <Selector
                 options={options}
                 value={selectedOption}

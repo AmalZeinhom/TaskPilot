@@ -3,13 +3,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../../API/axiosInstance";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import useProjectName from "@/hooks/Projects/useProjectName";
 import { CheckCircle } from "lucide-react";
 import { FaStarOfLife } from "react-icons/fa";
 
 export default function EditProject() {
   const { projectId } = useParams<{ projectId: string }>();
-  const projectName = useProjectName(projectId);
 
   const navigate = useNavigate();
 
@@ -62,12 +60,7 @@ export default function EditProject() {
           <Link to={"/projects"} className="cursor-pointer text-gray-500 hover:text-gray-700">
             Projects /
           </Link>
-          <Link
-            to={`/projects/${projectId}`}
-            className="cursor-pointer text-gray-500 hover:text-gray-700"
-          >
-            {projectName || ""} /
-          </Link>
+
           <span className="cursor-pointer text-blue-800">Edit Project</span>
         </div>
 

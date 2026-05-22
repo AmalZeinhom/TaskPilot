@@ -124,7 +124,7 @@ export default function Tasks() {
             Projects /
           </Link>
           <Link
-            to={`/projects/${projectId}`}
+            to={`/projects/${projectId}/edit-project`}
             className="cursor-pointer text-gray-500 hover:text-gray-700"
           >
             {projectName} /
