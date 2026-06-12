@@ -11,7 +11,7 @@ export const getCurrentUser = createAsyncThunk(
 
       return {
         name: user?.user_metadata?.name || "",
-        job_title: user?.user_metadata?.job_title || "Member"
+        department: user?.user_metadata?.department || "Member"
       };
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to fetch user");

@@ -3,7 +3,7 @@ import { getCurrentUser } from "./thunk";
 
 type User = {
   name: string;
-  job_title: string;
+  department: string;
 };
 
 type AuthState = {

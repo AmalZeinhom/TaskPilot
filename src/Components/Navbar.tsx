@@ -10,6 +10,8 @@ export default function Navbar({ setIsMobileOpen }: { setIsMobileOpen?: (v: bool
   // Present Naming for logged in users only.
   const initials = getInitials(user?.name);
 
+  console.log("AUTH USER:", user);
+
   return (
     <nav className="w-full bg-brightness-primary shadow-xl py-3 sm:py-4 px-4 sm:px-6 md:px-12 flex items-center z-50">
       <div className="flex items-center gap-3 sm:gap-4 pl-0 sm:pl-6 flex-shrink-0">
@@ -35,7 +37,7 @@ export default function Navbar({ setIsMobileOpen }: { setIsMobileOpen?: (v: bool
             {loading ? "Loading..." : user?.name || "Guest"}
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[140px] sm:max-w-[220px]">
-            {loading ? "" : user?.job_title || ""}
+            {loading ? "" : user?.department || ""}
           </p>
         </div>
 
