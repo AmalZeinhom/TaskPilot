@@ -1,12 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import ProjectMemberSkeleton from "@/Common/ProjectMemberSkeleton";
 import { getInitials } from "@/Utils/GetInitials";
 import { getAvatarColor } from "@/Utils/GetAvatarColor";
-import Selector from "@/Utils/Selector";
-import { roleOptions } from "@/Constants/roleOptions";
 import InviteMembersModal from "./InviteMembersModal";
 import { useProjectMembers } from "@/hooks/Members/useProjectMembers";
 
@@ -14,9 +11,13 @@ export default function ProjectMembers() {
   const [isInviteOpen, setInviteOpen] = useState(false);
   const { projectId } = useParams();
 
-  const { members, loading, updateMemberRole } = useProjectMembers(projectId);
+  const { members, loading, fetchMembers } = useProjectMembers(projectId);
 
   const isEmpty = !loading && members.length === 0;
+
+  useEffect(() => {
+    fetchMembers();
+  }, [projectId]);
 
   if (loading) {
     return (
@@ -104,22 +105,6 @@ export default function ProjectMembers() {
                     </p>
                     <p className="text-sm md:text-md text-gray-400">{member.email}</p>
                   </span>
-                </div>
-
-                <div className="relative flex items-center gap-2">
-                  <Selector
-                    options={roleOptions}
-                    value={roleOptions.find((o) => o.value === member.role) || null}
-                    onChange={(option) => {
-                      if (!option?.value) return;
-
-                      updateMemberRole(member.member_id, option.value);
-                    }}
-                  />
-
-                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-darkness-dark">
-                    <ChevronDown size={18} />
-                  </div>
                 </div>
               </div>
             </div>

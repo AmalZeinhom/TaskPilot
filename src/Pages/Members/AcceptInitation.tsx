@@ -39,9 +39,13 @@ export default function InvitePage() {
 
     const result = await accept(token);
 
-    if (result === true) {
-      // redirect after success
-      navigate("/projects", { replace: true });
+    if (result) {
+      toast.success("Invitation accepted");
+
+      // small delay عشان DB تلحق update
+      setTimeout(() => {
+        navigate("/projects", { replace: true });
+      }, 300);
     }
   };
 

@@ -4,7 +4,6 @@ import { ProjectMembersAPI } from "@/API/projectMembersAPI";
 type Member = {
   member_id: string;
   user_id: string;
-  role: string;
   email: string;
   metadata: {
     name: string;
@@ -55,5 +54,5 @@ export const useProjectMembers = (projectId?: string) => {
     fetchMembers();
   }, [projectId]);
 
-  return { members, loading, updateMemberRole };
+  return { members, loading, updateMemberRole, fetchMembers };
 };
