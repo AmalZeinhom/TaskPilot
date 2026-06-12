@@ -137,7 +137,7 @@ export function ForgetPassword() {
               <button
                 type="submit"
                 disabled={loading || disabled}
-                className={`obg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 rounded-xl font-medium transition-all ${
+                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 rounded-xl font-medium transition-all ${
                   loading || disabled
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:shadow-lg hover:scale-[1.02]"
