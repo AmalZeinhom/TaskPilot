@@ -253,13 +253,13 @@ export function EpicDetails({ epic, onUpdate }: EpicDetailsProps) {
                                 />
                               ) : (
                                 <span
-                                  className={`${bgColor} text-white text-[8px] rounded-full p-1`}
+                                  className={`${bgColor} text-white text-sm rounded-full w-6 h-6 p-1`}
                                 >
-                                  {assigneeInitials}
+                                  <p className="text-center">{assigneeInitials}</p>
                                 </span>
                               )}
 
-                              <p className="text-xs text-gray-500">
+                              <p className="text-md text-gray-500">
                                 {task.assignee?.name || "Unassigned"}
                               </p>
                             </div>

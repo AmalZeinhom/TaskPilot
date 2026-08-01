@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import logo from "../assets/logo.png";
+import logo from "@/assets/logo.png";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Store/store";
 import { getInitials } from "@/Utils/GetInitials";

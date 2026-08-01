@@ -94,11 +94,11 @@ export default function ProjectMembers() {
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full">
                 <div className="flex items-center gap-4">
-                  <span
+                  <div
                     className={`${getAvatarColor(member.metadata.name)} text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-sm md:text-lg font-semibold`}
                   >
                     {getInitials(member.metadata.name)}
-                  </span>
+                  </div>
                   <span className="flex flex-col">
                     <p className="text-sm md:text-base font-semibold text-darkness-dark ">
                       {member.metadata.name}
